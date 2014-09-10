@@ -1,0 +1,109 @@
+ScrollView:
+    GridLayout:
+        size_hint_y: None
+        height: self.minimum_height
+        cols: 1
+        ScanPanel:
+            id: scan
+
+        DevicesPanel:
+
+<ScanPanel@FloatLayout>:
+    height: max(logo.height, box.height)
+    size_hint_y: None
+    GridLayout:
+        id: box
+        cols: 1
+        size_hint_y: None
+        height: self.minimum_height
+        ToggleButton:
+            text: 'scan'
+            id: unfold
+            state: 'down'
+            size_hint: None, None
+            size: self.texture_size[0] + 10, self.texture_size[1] + 10
+
+        BoxLayout:
+            size_hint_y: None
+            height: scrollview.height
+            orientation: 'vertical'
+            ScrollView:
+                id: scrollview
+                pos: root.pos
+                size_hint_y: None
+                height: '200sp' if unfold.state == 'down' else 0
+                GridLayout:
+                    cols: 1
+                    size_hint_y: None
+                    height: self.minimum_height
+                    GridLayout:
+                        cols: 1
+                        size_hint_y: None
+                        height: self.minimum_height
+                        BoxLayout:
+                            size_hint_y: None
+                            height: '48dp'
+                            Label:
+                                text: 'address'
+                            Label:
+                                text: 'id'
+                            Label:
+                                text: 'power'
+                            Label:
+                                text: 'configure'
+                            Label:
+                                text: 'osc'
+                            Label:
+                                text: 'midi'
+                            Label:
+                                text: 'visu'
+
+                    GridLayout:
+                        id: results
+                        size_hint_y: None
+                        height: self.minimum_height
+                        cols: 1
+
+            Image:
+                id: logo
+                source: 'data/logo.png'
+                size_hint: None, None
+                size: self.texture_size
+                top: self.size and root.top - 10
+                right: self.size and root.right - 10
+
+<DevicesPanel>:
+
+<GraphZone>:
+
+<ObjectView>:
+
+<MidiConfig>:
+
+<OscConfig>:
+
+<PloogDevice>:
+    size_hint_y: None
+    height: '48dp'
+
+    BoxLayout:
+        pos_hint: {'center': (.5, .5)}
+        Label:
+            text: root.address
+        Label:
+            text: root.name
+        Label:
+            text: '%sdb' % root.power
+
+        Button:
+            text: 'c'
+
+        CheckBox:
+            active: root.send_osc
+            on_active: root.send_osc = self.active
+        CheckBox:
+            active: root.send_midi
+            on_active: root.send_midi = self.active
+        CheckBox:
+            active: root.display
+            on_active: root.display = self.active
