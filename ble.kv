@@ -227,53 +227,50 @@ ScrollView:
 
 <ConfigPanel>:
     cols: 1
+    visible: False
+    opacity: 1 if self.visible else 0
     size_hint_y: None
-    height: self.minimum_height
+    height: self.minimum_height if self.visible else 0
 
 <MidiConfig>:
-    visible: False
-    GridLayout:
+    BoxLayout:
         size_hint_y: None
-        height: self.minimum_height if root.visible else 0
-        cols: 1
-        BoxLayout:
-            size_hint_y: None
-            height: '48dp'
-            Label:
-                text: 'sensor'
-            Label:
-                text: 'active'
-            Label:
-                text: 'event type'
-            Label:
-                text: 'midi channel'
-            Label:
-                text: 'event id\n(0-127)'
-            Label:
-                text: 'value sensor\n(0-127)'
+        height: '48dp'
+        Label:
+            text: 'sensor'
+        Label:
+            text: 'active'
+        Label:
+            text: 'event type'
+        Label:
+            text: 'midi channel'
+        Label:
+            text: 'event id\n(0-127)'
+        Label:
+            text: 'value sensor\n(0-127)'
 
-        GridLayout:
-            cols: 1
-            size_hint_y: None
-            height: self.minimum_height
-            MidiSensorLine:
-                sensor: 'rx'
-            MidiSensorLine:
-                sensor: 'ry'
-            MidiSensorLine:
-                sensor: 'rz'
-            MidiSensorLine:
-                sensor: 'ax'
-            MidiSensorLine:
-                sensor: 'ay'
-            MidiSensorLine:
-                sensor: 'az'
-            MidiSensorLine:
-                sensor: 'cx'
-            MidiSensorLine:
-                sensor: 'cy'
-            MidiSensorLine:
-                sensor: 'cz'
+    GridLayout:
+        cols: 1
+        size_hint_y: None
+        height: self.minimum_height
+        MidiSensorLine:
+            sensor: 'rx'
+        MidiSensorLine:
+            sensor: 'ry'
+        MidiSensorLine:
+            sensor: 'rz'
+        MidiSensorLine:
+            sensor: 'ax'
+        MidiSensorLine:
+            sensor: 'ay'
+        MidiSensorLine:
+            sensor: 'az'
+        MidiSensorLine:
+            sensor: 'cx'
+        MidiSensorLine:
+            sensor: 'cy'
+        MidiSensorLine:
+            sensor: 'cz'
 
 <MidiSensorLine>:
     size_hint_y: None
@@ -291,8 +288,50 @@ ScrollView:
     TextInput:
 
 <OscConfig>:
-    visible: False
+    BoxLayout:
+        size_hint_y: None
+        height: '48sp'
+        Label:
+            text: 'ip'
+        Label:
+            text: 'port'
+        Label:
+            text: 'address'
+        Label:
+            text: 'content'
+        Label:
+            text: 'delete'
+
+    GridLayout:
+        cols: 1
+        id: content
+        size_hint_y: None
+        height: self.minimum_height
+
+    Button:
+        text: '+'
+        size_hint_y: None
+        height: '48sp'
+        on_press: root.add_line()
+
+<OscConfigLine>:
     size_hint_y: None
+    height: '48dp'
+    TextInput:
+        text: root.ip
+
+    TextInput:
+        text: root.port
+
+    TextInput:
+        text: root.address
+
+    TextInput:
+        text: root.address
+
+    Button:
+        text: 'x'
+        on_press: root.config.remove_line(root)
 
 <PloogDevice>:
     size_hint_y: None

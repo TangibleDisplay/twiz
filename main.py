@@ -65,8 +65,17 @@ class MidiSensorLine(BoxLayout):
     sensor = StringProperty('')
 
 
+class OscConfigLine(BoxLayout):
+    sensor = StringProperty('')
+    ip = StringProperty('')
+    port = StringProperty('')
+    address = StringProperty('/')
+    content = StringProperty('')
+    config = ObjectProperty(None)
+
+
 class ConfigPanel(GridLayout):
-    pass
+    device = ObjectProperty(None)
 
 
 class MidiConfig(ConfigPanel):
@@ -74,7 +83,11 @@ class MidiConfig(ConfigPanel):
 
 
 class OscConfig(ConfigPanel):
-    pass
+    def add_line(self):
+        self.ids.content.add_widget(OscConfigLine(config=self))
+
+    def remove_line(self, line):
+        self.ids.content.remove_widget(line)
 
 
 class PloogDevice(FloatLayout):
