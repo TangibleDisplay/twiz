@@ -95,26 +95,26 @@ ScrollView:
             size_hint: None, None
             size: self.texture_size[0] + 10, self.texture_size[1] + 10
 
-        BoxLayout:
+        ScrollView:
+            id: scrollview
+            pos: root.pos
             size_hint_y: None
-            height: scrollview.height
-            ScrollView:
-                id: scrollview
-                pos: root.pos
-                size_hint_y: None
-                height: content.height if unfold.state == 'down' else 0
+            height: content.height if unfold.state == 'down' else 0
 
-                GridLayout:
-                    cols: 1
-                    id: content
-                    size_hint_y: None
-                    height: self.minimum_height
+            GridLayout:
+                cols: 1
+                id: content
+                size_hint_y: None
+                height: self.minimum_height
 
 <GraphZone>:
     size_hint_y: None
-    height: 100
+    height: self.minimum_height
     cols: 1
-    BoxLayout:
+    GridLayout:
+        size_hint_y: None
+        height: self.minimum_height
+        rows: 1
         pos_hint: {'center': (.5, .5)}
         GridLayout:
             size_hint: None, None
@@ -143,11 +143,11 @@ ScrollView:
                 size: '48sp', '48sp'
                 on_press: root.focus = 'giro'
             Label:
-                text: '%s' % root.device.rx[-1] if root.device else ''
+                text: '%x' % root.device.rx[-1] if root.device else ''
             Label:
-                text: '%s' % root.device.ry[-1] if root.device else ''
+                text: '%x' % root.device.ry[-1] if root.device else ''
             Label:
-                text: '%s' % root.device.rz[-1] if root.device else ''
+                text: '%x' % root.device.rz[-1] if root.device else ''
 
             Button:
                 text: 'a'
@@ -156,11 +156,11 @@ ScrollView:
                 size: '48sp', '48sp'
                 on_press: root.focus = 'accelero'
             Label:
-                text: '%s' % root.device.ax[-1] if root.device else ''
+                text: '%x' % root.device.ax[-1] if root.device else ''
             Label:
-                text: '%s' % root.device.ay[-1] if root.device else ''
+                text: '%x' % root.device.ay[-1] if root.device else ''
             Label:
-                text: '%s' % root.device.az[-1] if root.device else ''
+                text: '%x' % root.device.az[-1] if root.device else ''
 
             Button:
                 text: 'c'
@@ -169,11 +169,11 @@ ScrollView:
                 size: '48sp', '48sp'
                 on_press: root.focus = 'compass'
             Label:
-                text: '%s' % root.device.cx[-1] if root.device else ''
+                text: '%x' % root.device.cx[-1] if root.device else ''
             Label:
-                text: '%s' % root.device.cy[-1] if root.device else ''
+                text: '%x' % root.device.cy[-1] if root.device else ''
             Label:
-                text: '%s' % root.device.cz[-1] if root.device else ''
+                text: '%x' % root.device.cz[-1] if root.device else ''
 
         Graph:
             device: root.device
@@ -225,10 +225,73 @@ ScrollView:
     MidiConfig:
         visible: root.device.send_midi
 
-<MidiConfig@FloatLayout>:
+<ConfigPanel>:
+    cols: 1
     size_hint_y: None
+    height: self.minimum_height
 
-<OscConfig@FloatLayout>:
+<MidiConfig>:
+    visible: False
+    GridLayout:
+        size_hint_y: None
+        height: self.minimum_height if root.visible else 0
+        cols: 1
+        BoxLayout:
+            size_hint_y: None
+            height: '48dp'
+            Label:
+                text: 'sensor'
+            Label:
+                text: 'active'
+            Label:
+                text: 'event type'
+            Label:
+                text: 'midi channel'
+            Label:
+                text: 'event id\n(0-127)'
+            Label:
+                text: 'value sensor\n(0-127)'
+
+        GridLayout:
+            cols: 1
+            size_hint_y: None
+            height: self.minimum_height
+            MidiSensorLine:
+                sensor: 'rx'
+            MidiSensorLine:
+                sensor: 'ry'
+            MidiSensorLine:
+                sensor: 'rz'
+            MidiSensorLine:
+                sensor: 'ax'
+            MidiSensorLine:
+                sensor: 'ay'
+            MidiSensorLine:
+                sensor: 'az'
+            MidiSensorLine:
+                sensor: 'cx'
+            MidiSensorLine:
+                sensor: 'cy'
+            MidiSensorLine:
+                sensor: 'cz'
+
+<MidiSensorLine>:
+    size_hint_y: None
+    height: '48dp'
+    Label:
+        text: root.sensor
+    CheckBox:
+    Spinner:
+        values: ('Note On', 'Note Off', 'Note Aftertouch', 'Controller')
+
+    Spinner:
+        values: ('%s' % x for x in range(16))
+
+    TextInput:
+    TextInput:
+
+<OscConfig>:
+    visible: False
     size_hint_y: None
 
 <PloogDevice>:

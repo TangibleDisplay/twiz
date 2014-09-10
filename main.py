@@ -1,6 +1,7 @@
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.properties import DictProperty, StringProperty, \
     NumericProperty, ListProperty, BooleanProperty, ObjectProperty
@@ -55,9 +56,25 @@ class ObjectView(GridLayout):
     device = ObjectProperty(None, rebind=True)
 
 
-class GraphZone(FloatLayout):
+class GraphZone(GridLayout):
     device = ObjectProperty(None, rebind=True)
     focus = StringProperty('giro')
+
+
+class MidiSensorLine(BoxLayout):
+    sensor = StringProperty('')
+
+
+class ConfigPanel(GridLayout):
+    pass
+
+
+class MidiConfig(ConfigPanel):
+    pass
+
+
+class OscConfig(ConfigPanel):
+    pass
 
 
 class PloogDevice(FloatLayout):
