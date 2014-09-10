@@ -1,0 +1,6 @@
+*.pyo
+*.pyc
+*.swo
+*.swp
+*.un~
+
