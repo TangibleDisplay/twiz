@@ -1,3 +1,8 @@
+#:set color_x (1, 0, 0, 1)
+#:set color_y (0, 1, 0, 1)
+#:set color_z (0, 0, 1, 1)
+#:import chain itertools.chain
+
 ScrollView:
     GridLayout:
         size_hint_y: None
@@ -7,8 +12,9 @@ ScrollView:
             id: scan
 
         DevicesPanel:
+            id: visu
 
-<ScanPanel@FloatLayout>:
+<ScanPanel@BoxLayout>:
     height: max(logo.height, box.height)
     size_hint_y: None
     GridLayout:
@@ -31,8 +37,10 @@ ScrollView:
                 id: scrollview
                 pos: root.pos
                 size_hint_y: None
-                height: '200sp' if unfold.state == 'down' else 0
+                max_height: '200sp'
+                height: min(self.max_height, grid.height) if unfold.state == 'down' else 0
                 GridLayout:
+                    id: grid
                     cols: 1
                     size_hint_y: None
                     height: self.minimum_height
@@ -72,15 +80,156 @@ ScrollView:
                 top: self.size and root.top - 10
                 right: self.size and root.right - 10
 
-<DevicesPanel>:
+<DevicesPanel@BoxLayout>:
+    height: box.height
+    size_hint_y: None
+    GridLayout:
+        id: box
+        cols: 1
+        size_hint_y: None
+        height: self.minimum_height
+        ToggleButton:
+            text: 'visu'
+            id: unfold
+            state: 'down'
+            size_hint: None, None
+            size: self.texture_size[0] + 10, self.texture_size[1] + 10
+
+        BoxLayout:
+            size_hint_y: None
+            height: scrollview.height
+            ScrollView:
+                id: scrollview
+                pos: root.pos
+                size_hint_y: None
+                height: content.height if unfold.state == 'down' else 0
+
+                GridLayout:
+                    cols: 1
+                    id: content
+                    size_hint_y: None
+                    height: self.minimum_height
 
 <GraphZone>:
+    size_hint_y: None
+    height: 100
+    cols: 1
+    BoxLayout:
+        pos_hint: {'center': (.5, .5)}
+        GridLayout:
+            size_hint: None, None
+            size: self.minimum_size
+            cols: 4
+            Widget:
+            Label:
+                text: 'x'
+                size_hint: None, None
+                size: '48sp', '48sp'
+            Label:
+                text: 'y'
+                size_hint: None, None
+                size: self.texture_size
+                size: '48sp', '48sp'
+            Label:
+                text: 'z'
+                size_hint: None, None
+                size: self.texture_size
+                size: '48sp', '48sp'
 
+            Button:
+                text: 'g'
+                size_hint: None, None
+                size: self.texture_size
+                size: '48sp', '48sp'
+                on_press: root.focus = 'giro'
+            Label:
+                text: '%s' % root.device.rx[-1] if root.device else ''
+            Label:
+                text: '%s' % root.device.ry[-1] if root.device else ''
+            Label:
+                text: '%s' % root.device.rz[-1] if root.device else ''
+
+            Button:
+                text: 'a'
+                size_hint: None, None
+                size: self.texture_size
+                size: '48sp', '48sp'
+                on_press: root.focus = 'accelero'
+            Label:
+                text: '%s' % root.device.ax[-1] if root.device else ''
+            Label:
+                text: '%s' % root.device.ay[-1] if root.device else ''
+            Label:
+                text: '%s' % root.device.az[-1] if root.device else ''
+
+            Button:
+                text: 'c'
+                size_hint: None, None
+                size: self.texture_size
+                size: '48sp', '48sp'
+                on_press: root.focus = 'compass'
+            Label:
+                text: '%s' % root.device.cx[-1] if root.device else ''
+            Label:
+                text: '%s' % root.device.cy[-1] if root.device else ''
+            Label:
+                text: '%s' % root.device.cz[-1] if root.device else ''
+
+        Graph:
+            device: root.device
+            focus: root.focus
+
+<Graph>:
+    focus: ''
+    line_x: {'giro': root.device.rx, 'accelero': root.device.ax, 'compass': root.device.cx}[root.focus] if root.device else [0]
+    line_y: {'giro': root.device.ry, 'accelero': root.device.ay, 'compass': root.device.cy}[root.focus] if root.device else [0]
+    line_z: {'giro': root.device.rz, 'accelero': root.device.az, 'compass': root.device.cz}[root.focus] if root.device else [0]
+    data_len: max(map(len, (self.line_x, self.line_y, self.line_z)))
+    max_value: 0xffff
+    canvas:
+        Color:
+            rgba: color_x
+        Line:
+            points:
+                chain(*[
+                (root.x + x * self.width / root.data_len,
+                self.y + self.height * y / root.max_value)
+                for x, y in enumerate(root.line_x)
+                ]) if root.data_len and root.max_value and root.line_x else ()
+        Color:
+            rgba: color_y
+        Line:
+            points:
+                chain(*[
+                (root.x + x * self.width / root.data_len,
+                self.y + self.height * y / root.max_value)
+                for x, y in enumerate(root.line_y)
+                ]) if root.data_len and root.max_value and root.line_y else ()
+        Color:
+            rgba: color_z
+        Line:
+            points:
+                chain(*[
+                (root.x + x * self.width / root.data_len,
+                self.y + self.height * y / root.max_value)
+                for x, y in enumerate(root.line_z)
+                ]) if root.data_len and root.max_value and root.line_z else ()
 <ObjectView>:
+    size_hint_y: None
+    cols: 1
+    height: self.minimum_height
+    GraphZone:
+        device: root.device
+    OscConfig:
+        visible: root.device.send_osc
+    MidiConfig:
+        visible: root.device.send_midi
 
-<MidiConfig>:
+<MidiConfig@FloatLayout>:
+    size_hint_y: None
 
-<OscConfig>:
+<OscConfig@FloatLayout>:
+    size_hint_y: None
 
 <PloogDevice>:
     size_hint_y: None

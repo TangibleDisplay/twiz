@@ -1,9 +1,12 @@
 from kivy.app import App
+from kivy.uix.widget import Widget
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.properties import DictProperty, StringProperty, \
-    NumericProperty, ListProperty, BooleanProperty
+    NumericProperty, ListProperty, BooleanProperty, ObjectProperty
 from kivy.clock import Clock, mainthread
 
+from random import randint
 import bluetooth._bluetooth as bluez
 import sys
 from time import time
@@ -48,6 +51,15 @@ def packed_bdaddr_to_string(bdaddr_packed):
         bdaddr_packed[:: -1]))
 
 
+class ObjectView(GridLayout):
+    device = ObjectProperty(None, rebind=True)
+
+
+class GraphZone(FloatLayout):
+    device = ObjectProperty(None, rebind=True)
+    focus = StringProperty('giro')
+
+
 class PloogDevice(FloatLayout):
     name = StringProperty('')
     address = StringProperty('')
@@ -56,15 +68,15 @@ class PloogDevice(FloatLayout):
     send_osc = BooleanProperty(False)
     send_midi = BooleanProperty(False)
     display = BooleanProperty(False)
-    rx = ListProperty([])
-    ry = ListProperty([])
-    rz = ListProperty([])
-    cx = ListProperty([])
-    cy = ListProperty([])
-    cz = ListProperty([])
-    ax = ListProperty([])
-    ay = ListProperty([])
-    az = ListProperty([])
+    rx = ListProperty([0, ])
+    ry = ListProperty([0, ])
+    rz = ListProperty([0, ])
+    cx = ListProperty([0, ])
+    cy = ListProperty([0, ])
+    cz = ListProperty([0, ])
+    ax = ListProperty([0, ])
+    ay = ListProperty([0, ])
+    az = ListProperty([0, ])
 
     def update_data(self, data):
         for d in data:
@@ -74,6 +86,19 @@ class PloogDevice(FloatLayout):
                 # TODO assign values
                 pass
         self.last_update = time()
+        self.rx.append(randint(0, 0xffff))
+        self.ry.append(randint(0, 0xffff))
+        self.rz.append(randint(0, 0xffff))
+        self.ax.append(randint(0, 0xffff))
+        self.ay.append(randint(0, 0xffff))
+        self.az.append(randint(0, 0xffff))
+
+        self.rx = self.rx[-100:]
+        self.ry = self.ry[-100:]
+        self.rz = self.rz[-100:]
+        self.ax = self.ax[-100:]
+        self.ay = self.ay[-100:]
+        self.az = self.az[-100:]
 
     def on_display(self, *args):
         if not self.display:
@@ -83,8 +108,13 @@ class PloogDevice(FloatLayout):
             app.add_visu(self)
 
 
+class Graph(Widget):
+    device = ObjectProperty(None, rebind=True)
+
+
 class BLEApp(App):
     scan_results = DictProperty({})
+    visus = DictProperty({})
 
     def build(self):
         self.init_ble()
@@ -122,10 +152,14 @@ class BLEApp(App):
             hci_disable_le_scan(sock)
 
     def add_visu(self, device):
-        pass
+        w = ObjectView(device=device)
+        self.visus[device] = w
+        self.root.ids.visu.ids.content.add_widget(w)
 
     def remove_visu(self, device):
-        pass
+        w = self.visus.get(device)
+        if w and w in self.root.ids.visu.ids.content.children:
+            self.root.ids.visu.ids.content.remove_widget(w)
 
     @mainthread
     def update_device(self, data):
