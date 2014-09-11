@@ -92,6 +92,7 @@ class OscConfig(ConfigPanel):
 
 
 class PloogDevice(FloatLayout):
+    active = BooleanProperty(False)
     name = StringProperty('')
     address = StringProperty('')
     power = NumericProperty(0)
@@ -162,6 +163,7 @@ class BLEApp(App):
             if v.last_update < t:
                 self.scan_results.pop(k)
                 self.root.ids.scan.ids.results.remove_widget(v)
+                self.remove_visu(v)
 
     def init_ble(self):
         self.old_filter = sock.getsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, 14)
