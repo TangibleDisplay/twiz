@@ -234,7 +234,7 @@ class PloogDevice(FloatLayout):
             for i in content.split(' '):
                 i = i.strip()
                 data.append(getattr(self, i)[-1])
-            print "osc sending data", data
+            # print "osc sending data", data
             sendto(data.getBinary(), (ip, int(port)))
 
     def send_midi_updates(self):
@@ -249,7 +249,7 @@ class PloogDevice(FloatLayout):
                 signal, chan, ev_id.replace('v', '') or value,
                 ev_value.replace('v', '') or value))
             message = tuple(message)
-            print "sending message %s" % (message,)
+            # print "sending message %s" % (message,)
             port.send_message(message)
 
     def on_display(self, *args):
@@ -401,34 +401,6 @@ class BLEApp(App):
                                         data['sensor'] = sensor_data
                                     break
                                 offset += dlen + 1
-
-                        # elif report_event_type == ADV_DIRECT_IND:
-                        #     # print "\tADV_DIRECT_IND"
-                        #     pass
-
-                        # elif report_event_type == ADV_SCAN_IND:
-                        #     # print "\tADV_SCAN_IND"
-                        #     pass
-
-                        # elif report_event_type == ADV_NONCONN_IND:
-                        #     # print "\tADV_NONCONN_IND"
-                        #     pass
-
-                        elif report_event_type == ADV_SCAN_RSP:
-                            # print "\tADV_SCAN_RSP"
-                            # print hexlify(pkt)
-                            # print r''.join(pkt)
-                            if not report_data_length:
-                                continue
-
-                            # XXX is this the used one? seems weird it's
-                            # different from ADV_IND managed
-                            local_name_len, = unpack(
-                                "B", pkt[report_pkt_offset + 11])
-                            name = pkt[
-                                report_pkt_offset + 12:
-                                report_pkt_offset + 12 + local_name_len]
-                            data['name'] = name
                         else:
                             pass
                             print "\tUnknown or reserved event type"
