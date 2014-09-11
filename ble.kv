@@ -137,11 +137,11 @@ ScrollView:
                 size: '48sp', '48sp'
 
             Button:
-                text: 'g'
+                text: 'euler'
                 size_hint: None, None
                 size: self.texture_size
                 size: '48sp', '48sp'
-                on_press: root.focus = 'giro'
+                on_press: root.focus = 'euler'
             Label:
                 text: '%x' % root.device.rx[-1] if root.device else ''
             Label:
@@ -150,7 +150,7 @@ ScrollView:
                 text: '%x' % root.device.rz[-1] if root.device else ''
 
             Button:
-                text: 'a'
+                text: 'accel'
                 size_hint: None, None
                 size: self.texture_size
                 size: '48sp', '48sp'
@@ -162,18 +162,18 @@ ScrollView:
             Label:
                 text: '%x' % root.device.az[-1] if root.device else ''
 
-            Button:
-                text: 'c'
-                size_hint: None, None
-                size: self.texture_size
-                size: '48sp', '48sp'
-                on_press: root.focus = 'compass'
-            Label:
-                text: '%x' % root.device.cx[-1] if root.device else ''
-            Label:
-                text: '%x' % root.device.cy[-1] if root.device else ''
-            Label:
-                text: '%x' % root.device.cz[-1] if root.device else ''
+#             Button:
+#                 text: 'c'
+#                 size_hint: None, None
+#                 size: self.texture_size
+#                 size: '48sp', '48sp'
+#                 on_press: root.focus = 'compass'
+#             Label:
+#                 text: '%x' % root.device.cx[-1] if root.device else ''
+#             Label:
+#                 text: '%x' % root.device.cy[-1] if root.device else ''
+#             Label:
+#                 text: '%x' % root.device.cz[-1] if root.device else ''
 
         Graph:
             device: root.device
@@ -181,10 +181,10 @@ ScrollView:
 
 <Graph>:
     focus: ''
-    line_x: {'giro': root.device.rx, 'accelero': root.device.ax, 'compass': root.device.cx}[root.focus] if root.device else [0]
-    line_y: {'giro': root.device.ry, 'accelero': root.device.ay, 'compass': root.device.cy}[root.focus] if root.device else [0]
-    line_z: {'giro': root.device.rz, 'accelero': root.device.az, 'compass': root.device.cz}[root.focus] if root.device else [0]
-    data_len: max(map(len, (self.line_x, self.line_y, self.line_z)))
+    line_x: {'euler': root.device.rx, 'accelero': root.device.ax}[root.focus] if root.device else [0]
+    line_y: {'euler': root.device.ry, 'accelero': root.device.ay}[root.focus] if root.device else [0]
+    line_z: {'euler': root.device.rz, 'accelero': root.device.az}[root.focus] if root.device else [0]
+    data_len: min(max(map(len, (self.line_x, self.line_y, self.line_z))), 100)
     max_value: 0xffff
     canvas:
         Color:
@@ -194,7 +194,7 @@ ScrollView:
                 chain(*[
                 (root.x + x * self.width / root.data_len,
                 self.y + self.height * y / root.max_value)
-                for x, y in enumerate(root.line_x)
+                for x, y in enumerate(root.line_x[-100:])
                 ]) if root.data_len and root.max_value and root.line_x else ()
         Color:
             rgba: color_y
@@ -203,7 +203,7 @@ ScrollView:
                 chain(*[
                 (root.x + x * self.width / root.data_len,
                 self.y + self.height * y / root.max_value)
-                for x, y in enumerate(root.line_y)
+                for x, y in enumerate(root.line_y[-100:])
                 ]) if root.data_len and root.max_value and root.line_y else ()
         Color:
             rgba: color_z
@@ -212,8 +212,9 @@ ScrollView:
                 chain(*[
                 (root.x + x * self.width / root.data_len,
                 self.y + self.height * y / root.max_value)
-                for x, y in enumerate(root.line_z)
+                for x, y in enumerate(root.line_z[-100:])
                 ]) if root.data_len and root.max_value and root.line_z else ()
+
 <ObjectView>:
     size_hint_y: None
     cols: 1
@@ -280,22 +281,31 @@ ScrollView:
         height: self.minimum_height
         MidiSensorLine:
             sensor: 'rx'
+            device: root.device
         MidiSensorLine:
             sensor: 'ry'
+            device: root.device
         MidiSensorLine:
             sensor: 'rz'
+            device: root.device
         MidiSensorLine:
             sensor: 'ax'
+            device: root.device
         MidiSensorLine:
             sensor: 'ay'
+            device: root.device
         MidiSensorLine:
             sensor: 'az'
-        MidiSensorLine:
-            sensor: 'cx'
-        MidiSensorLine:
-            sensor: 'cy'
-        MidiSensorLine:
-            sensor: 'cz'
+            device: root.device
+        # MidiSensorLine:
+        #     sensor: 'cx'
+        #     device: root.device
+        # MidiSensorLine:
+        #     sensor: 'cy'
+        #     device: root.device
+        # MidiSensorLine:
+        #     sensor: 'cz'
+        #     device: root.device
 
 <MidiSensorLine>:
     size_hint_y: None
