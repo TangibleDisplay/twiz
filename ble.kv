@@ -218,12 +218,37 @@ ScrollView:
     size_hint_y: None
     cols: 1
     height: self.minimum_height
-    GraphZone:
-        device: root.device
-    OscConfig:
-        visible: root.device.send_osc
-    MidiConfig:
-        visible: root.device.send_midi
+    GridLayout:
+        size_hint_y: None
+        height: self.minimum_height
+        cols: 1 if self.width < 500 else 2
+        GridLayout:
+            cols: 1
+            id: grid
+            size_hint_y: None
+            height: self.minimum_height
+            GraphZone:
+                device: root.device
+            OscConfig:
+                visible: root.device.send_osc
+            MidiConfig:
+                visible: root.device.send_midi
+
+        CenteredView:
+            id: view
+            scene: 'cube.obj'
+            size_hint_y: None
+            display_all: True
+            scene_scale: 4.0
+            cam_rotation:
+                (
+                root.device.rx[-1] * 360. / 0xffff,
+                root.device.ry[-1] * 360. / 0xffff,
+                root.device.rz[-1] * 360. / 0xffff
+                )
+            cam_translation: 0, -2, -8
+            light_sources:
+                {x: ([float(y) * 15 for y in bin(x)[2:].rjust(3, '0')] + [1.0]) for x in range(8)}
 
 <ConfigPanel>:
     cols: 1

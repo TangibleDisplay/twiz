@@ -6,6 +6,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.properties import DictProperty, StringProperty, \
     NumericProperty, ListProperty, BooleanProperty, ObjectProperty
 from kivy.clock import Clock, mainthread
+import kivy.garden.ddd  # noqa
 
 from random import randint
 import bluetooth._bluetooth as bluez
@@ -116,12 +117,12 @@ class PloogDevice(FloatLayout):
                 # TODO assign values
                 pass
         self.last_update = time()
-        self.rx.append(randint(0, 0xffff))
-        self.ry.append(randint(0, 0xffff))
-        self.rz.append(randint(0, 0xffff))
-        self.ax.append(randint(0, 0xffff))
-        self.ay.append(randint(0, 0xffff))
-        self.az.append(randint(0, 0xffff))
+        self.rx.append((self.rx[-1] + randint(-0xfff, 0xfff)) % 0xffff)
+        self.ry.append((self.ry[-1] + randint(-0xfff, 0xfff)) % 0xffff)
+        self.rz.append((self.rz[-1] + randint(-0xfff, 0xfff)) % 0xffff)
+        self.ax.append((self.ax[-1] + randint(-0xfff, 0xfff)) % 0xffff)
+        self.ay.append((self.ay[-1] + randint(-0xfff, 0xfff)) % 0xffff)
+        self.az.append((self.az[-1] + randint(-0xfff, 0xfff)) % 0xffff)
 
         self.rx = self.rx[-100:]
         self.ry = self.ry[-100:]
