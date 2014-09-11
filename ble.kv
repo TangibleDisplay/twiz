@@ -232,8 +232,10 @@ ScrollView:
                 device: root.device
             OscConfig:
                 visible: root.device.send_osc
+                device: root.device
             MidiConfig:
                 visible: root.device.send_midi
+                device: root.device
 
         CenteredView:
             id: view
@@ -273,7 +275,7 @@ ScrollView:
         Label:
             text: 'event id\n(0-127)'
         Label:
-            text: 'value sensor\n(0-127)'
+            text: 'event value\n(0-127)'
 
     GridLayout:
         cols: 1
@@ -313,14 +315,25 @@ ScrollView:
     Label:
         text: root.sensor
     CheckBox:
+        active: root.active
+        on_active: root.active = self.active
     Spinner:
+        text: root.signal
         values: ('Note On', 'Note Off', 'Note Aftertouch', 'Controller')
+        on_text: root.signal = self.text
 
     Spinner:
+        text: root.chan
         values: ('%s' % x for x in range(16))
+        on_text: root.chan = self.text
 
     TextInput:
+        text: root.event_id
+        on_text: root.event_id = self.text
+
     TextInput:
+        text: root.event_value
+        on_text: root.event_value = self.text
 
 <OscConfig>:
     BoxLayout:
@@ -354,15 +367,19 @@ ScrollView:
     height: '48dp'
     TextInput:
         text: root.ip
+        on_text: root.ip = self.text
 
     TextInput:
         text: root.port
+        on_text: root.port = self.text
 
     TextInput:
         text: root.address
+        on_text: root.address = self.text
 
     TextInput:
-        text: root.address
+        text: root.content
+        on_text: root.content = self.text
 
     Button:
         text: 'x'
@@ -394,3 +411,6 @@ ScrollView:
         CheckBox:
             active: root.display
             on_active: root.display = self.active
+
+<TextInput>:
+    multiline: False

@@ -7,8 +7,11 @@ from kivy.properties import DictProperty, StringProperty, \
     NumericProperty, ListProperty, BooleanProperty, ObjectProperty
 from kivy.clock import Clock, mainthread
 import kivy.garden.ddd  # noqa
+from kivy.lib.osc.OSC import OSCMessage
 
-from random import randint
+from socket import socket, AF_INET, SOCK_DGRAM
+from uuid import uuid4 as uuid
+import rtmidi2
 import bluetooth._bluetooth as bluez
 import sys
 from time import time
@@ -23,6 +26,17 @@ from bt_consts import (
     ADV_SCAN_RSP,
     ADV_IND,
 )
+
+MIDI_SIGNALS = {
+    176: 'Control',
+    128: 'Note Off',
+    144: 'Note On',
+    224: 'Note Aftertouch',
+    'Control': 176,
+    'Note Off': 128,
+    'Note On': 144,
+    'Note Aftertouch': 224,
+}
 
 dev_id = 0
 try:
@@ -59,20 +73,76 @@ class ObjectView(GridLayout):
 
 class GraphZone(GridLayout):
     device = ObjectProperty(None, rebind=True)
-    focus = StringProperty('giro')
+    focus = StringProperty('euler')
 
 
 class MidiSensorLine(BoxLayout):
     sensor = StringProperty('')
+    device = ObjectProperty(None, rebind=True)
+    active = BooleanProperty(False)
+    signal = StringProperty('')
+    chan = StringProperty('')
+    event_id = StringProperty('')
+    event_value = StringProperty('')
+
+    def __init__(self, **kwargs):
+        super(MidiSensorLine, self).__init__(**kwargs)
+        self.bind(
+            active=self.update,
+            chan=self.update,
+            signal=self.update,
+            event_id=self.update,
+            event_value=self.update
+        )
+
+    def update(self, *args):
+        app.config.set(
+            self.device.address + '-midi',
+            self.sensor,
+            '%s,%s,%s,%s,%s' % (
+                1 if self.active else 0,
+                MIDI_SIGNALS.get(self.signal, ''),
+                self.chan,
+                self.event_id,
+                self.event_value
+            )
+        )
+
+    def on_device(self, *args):
+        if self.device:
+            self.load_values(self.device)
+
+    def load_values(self, device):
+        section = device.address + '-midi'
+        values = app.config.get(section, self.sensor)
+        active, signal, chan, event_id, event_value = values.split(',')
+        self.active = True if active == '1' else False
+        self.signal = MIDI_SIGNALS.get(int(signal), 'Note On')
+        self.chan = chan
+        self.event_id = event_id
+        self.event_value = event_value
 
 
 class OscConfigLine(BoxLayout):
-    sensor = StringProperty('')
-    ip = StringProperty('')
+    key = StringProperty('')
+    ip = StringProperty('localhost')
     port = StringProperty('')
     address = StringProperty('/')
     content = StringProperty('')
     config = ObjectProperty(None)
+
+    def __init__(self, **kwargs):
+        super(OscConfigLine, self).__init__(**kwargs)
+        self.bind(ip=self.update,
+                  port=self.update,
+                  address=self.update,
+                  content=self.update)
+
+    def update(self, *args):
+        app.config.set(
+            self.config.device.address + '-osc', self.key,
+            '%s,%s,%s,%s' %
+            (self.ip, self.port, self.address, self.content.replace(',', ' ')))
 
 
 class ConfigPanel(GridLayout):
@@ -84,11 +154,26 @@ class MidiConfig(ConfigPanel):
 
 
 class OscConfig(ConfigPanel):
-    def add_line(self):
-        self.ids.content.add_widget(OscConfigLine(config=self))
+    device = ObjectProperty(None, rebind=True)
+
+    def on_device(self, *args):
+        if self.device:
+            self.load_config(self.device)
+
+    def load_config(self, device):
+        for k, v in app.config.items(self.device.address + '-osc'):
+            ip, port, address, content = v.split(',')
+            self.add_line(
+                key=k, ip=ip, port=port, address=address,
+                content=content.replace(' ', ','))
+
+    def add_line(self, **kwargs):
+        kwargs.setdefault('key', str(uuid()))
+        self.ids.content.add_widget(OscConfigLine(config=self, **kwargs))
 
     def remove_line(self, line):
         self.ids.content.remove_widget(line)
+        app.config.remove_option(line.key)
 
 
 class PloogDevice(FloatLayout):
@@ -114,23 +199,58 @@ class PloogDevice(FloatLayout):
         for d in data:
             if d in ('name', 'address', 'power'):
                 setattr(self, d, data[d])
-            elif False:
-                # TODO assign values
-                pass
-        self.last_update = time()
-        self.rx.append((self.rx[-1] + randint(-0xfff, 0xfff)) % 0xffff)
-        self.ry.append((self.ry[-1] + randint(-0xfff, 0xfff)) % 0xffff)
-        self.rz.append((self.rz[-1] + randint(-0xfff, 0xfff)) % 0xffff)
-        self.ax.append((self.ax[-1] + randint(-0xfff, 0xfff)) % 0xffff)
-        self.ay.append((self.ay[-1] + randint(-0xfff, 0xfff)) % 0xffff)
-        self.az.append((self.az[-1] + randint(-0xfff, 0xfff)) % 0xffff)
 
-        self.rx = self.rx[-100:]
-        self.ry = self.ry[-100:]
-        self.rz = self.rz[-100:]
-        self.ax = self.ax[-100:]
-        self.ay = self.ay[-100:]
-        self.az = self.az[-100:]
+            elif d == 'sensor':
+                d = data['sensor']
+                self.ax.append(d[0] % 0xffff)
+                self.ay.append(d[1] % 0xffff)
+                self.az.append(d[2] % 0xffff)
+
+                self.rx.append(d[3] % 0xffff)
+                self.ry.append(d[4] % 0xffff)
+                self.rz.append(d[5] % 0xffff)
+
+        self.last_update = time()
+
+        self.send_updates()
+
+    def send_updates(self):
+        if not self.active:
+            return
+
+        if self.send_osc:
+            self.send_osc_updates()
+
+        if self.send_midi:
+            self.send_midi_updates()
+
+    def send_osc_updates(self):
+        sendto = app.osc_socket.sendto
+        # XXX potential performances killer, maybe cache these somewhere
+        for k, v in app.config.items(self.address + '-osc'):
+            ip, port, address, content = v.split(',')
+            data = OSCMessage()
+            data.setAddress(address)
+            for i in content.split(' '):
+                i = i.strip()
+                data.append(getattr(self, i)[-1])
+            print "osc sending data", data
+            sendto(data.getBinary(), (ip, int(port)))
+
+    def send_midi_updates(self):
+        port = app.midi_out
+        items = app.config.items(self.address + '-midi')
+        for k, v in items:
+            active, signal, chan, ev_id, ev_value = v.split(',')
+            if not active == '1':
+                continue
+            value = getattr(self, k)[-1] >> 9
+            message = (int(x) for x in (
+                signal, chan, ev_id.replace('v', '') or value,
+                ev_value.replace('v', '') or value))
+            message = tuple(message)
+            print "sending message %s" % (message,)
+            port.send_message(message)
 
     def on_display(self, *args):
         if not self.display:
@@ -142,11 +262,17 @@ class PloogDevice(FloatLayout):
 
 class Graph(Widget):
     device = ObjectProperty(None, rebind=True)
+    line_x = ListProperty([], rebind=True)
+    line_y = ListProperty([], rebind=True)
+    line_z = ListProperty([], rebind=True)
+    data_len = NumericProperty(0)
 
 
 class BLEApp(App):
     scan_results = DictProperty({})
     visus = DictProperty({})
+    sensor_list = ListProperty(
+        ['rx', 'ry', 'rz', 'ax', 'ay', 'az', 'cx', 'cy', 'cz'])
 
     def build(self):
         self.init_ble()
@@ -154,8 +280,18 @@ class BLEApp(App):
         self.parser_thread.daemon = True
         self.parser_thread.start()
         self.set_scanning(True)
+        self.osc_socket = socket(AF_INET, SOCK_DGRAM)
+        self.midi_out = rtmidi2.MidiOut().open_virtual_port(':0')
         Clock.schedule_interval(self.clean_results, 1)
         return super(BLEApp, self).build()
+
+    def build_config(self, config):
+        config.setdefaults('general', {})
+
+    def on_stop(self, *args):
+        print "writing config"
+        self.config.write()
+        print "config written"
 
     def clean_results(self, dt):
         t = time() - 10  # forget devices after 10 seconds without any update
@@ -184,7 +320,23 @@ class BLEApp(App):
         else:
             hci_disable_le_scan(sock)
 
+    def ensure_sections(self, device):
+        section = device.address + '-osc'
+        if not self.config.has_section(section):
+            app.config.add_section(section)
+            app.config.setdefaults(section, {
+                })
+
+        section = device.address + '-midi'
+        if not self.config.has_section(section):
+            app.config.add_section(section)
+            app.config.setdefaults(section, {
+                k: '0,0,0,0,v'
+                for k in app.sensor_list
+            })
+
     def add_visu(self, device):
+        self.ensure_sections(device)
         w = ObjectView(device=device)
         self.visus[device] = w
         self.root.ids.visu.ids.content.add_widget(w)
@@ -232,9 +384,23 @@ class BLEApp(App):
                             local_name_len, = unpack(
                                 "B", pkt[report_pkt_offset + 10])
                             name = pkt[
-                                report_pkt_offset + 11:
+                                report_pkt_offset + 11 + 1:
                                 report_pkt_offset + 11 + local_name_len]
                             data['name'] = name
+
+                            dtype = 0
+                            offset = report_pkt_offset + 11 + local_name_len
+                            while offset < report_data_length:
+                                dlen, dtype = unpack(
+                                    'BB', pkt[offset:offset + 2])
+                                if dtype == 0xff:
+                                    sensor_data = unpack(
+                                        '<' + 'h' * ((dlen - 3) // 2),
+                                        pkt[offset + 4:offset + dlen + 1])
+                                    if len(sensor_data) == 6:
+                                        data['sensor'] = sensor_data
+                                    break
+                                offset += dlen + 1
 
                         # elif report_event_type == ADV_DIRECT_IND:
                         #     # print "\tADV_DIRECT_IND"
@@ -251,7 +417,6 @@ class BLEApp(App):
                         elif report_event_type == ADV_SCAN_RSP:
                             # print "\tADV_SCAN_RSP"
                             # print hexlify(pkt)
-                            # import pudb; pudb.set_trace()
                             # print r''.join(pkt)
                             if not report_data_length:
                                 continue
