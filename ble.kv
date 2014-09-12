@@ -1,6 +1,8 @@
 #:set color_x (1, 0, 0, 1)
 #:set color_y (0, 1, 0, 1)
 #:set color_z (0, 0, 1, 1)
+#:set red (1, 0, 0, 1)
+#:set white (1, 1, 1, 1)
 #:set line '48dp'
 #:set small_line '32dp'
 #:import chain itertools.chain
@@ -62,10 +64,6 @@ ScrollView:
                                 text: 'power'
                             Label:
                                 text: 'activate'
-                            Label:
-                                text: 'osc'
-                            Label:
-                                text: 'midi'
                             Label:
                                 text: 'visu'
 
@@ -207,28 +205,29 @@ ScrollView:
 
 <ObjectView>:
     size_hint_y: None
-    cols: 1
     height: self.minimum_height
+    cols: 1
+    GraphZone:
+        device: root.device
     GridLayout:
+        cols: 1 if self.width < 1000 else 2
+        id: grid
         size_hint_y: None
         height: self.minimum_height
-        cols: 1 if self.width < 800 else 2
         GridLayout:
-            cols: 1
-            id: grid
             size_hint_y: None
+            orientation: 'vertical'
             height: self.minimum_height
-            GraphZone:
-                device: root.device
+            cols: 1
             OscConfig:
-                visible: root.device.send_osc
                 device: root.device
             MidiConfig:
-                visible: root.device.send_midi
                 device: root.device
 
-        CenteredView:
+        View:
             id: view
+            height: 500
+            size_hint_x: None
             scene: 'cube.obj'
             size_hint_y: None
             display_all: True
@@ -245,11 +244,8 @@ ScrollView:
 
 <ConfigPanel>:
     cols: 1
-    visible: False
-    opacity: 1 if self.visible else 0
-    disabled: not self.visible
     size_hint_y: None
-    height: self.minimum_height if self.visible else 0
+    height: self.minimum_height
 
 <MidiConfig>:
     BoxLayout:
@@ -325,6 +321,9 @@ ScrollView:
         text: '+'
         size_hint_y: None
         height: '48sp'
+        visible: len(content.children) < 6
+        opacity: 1 if self.visible else 0
+        disabled: not self.visible
         on_press: root.add_line()
 
 <OscConfigLine>:
@@ -337,14 +336,18 @@ ScrollView:
     TextInput:
         text: root.port
         on_text: root.port = self.text
+        background_color: white if self.text .isdigit() else red # don't remove the space!
 
     TextInput:
         text: root.address
         on_text: root.address = self.text
+        background_color: white if self.text .startswith('/') else red # don't remove the space!
 
     TextInput:
         text: root.content
         on_text: root.content = self.text
+        background_color: white if all(x in app.sensor_list for x in self.text .split(',')) else red # don't remove the space!
+
 
     Button:
         text: 'x'
@@ -367,12 +370,6 @@ ScrollView:
             active: root.active
             on_active: root.active = self.active
 
-        CheckBox:
-            active: root.send_osc
-            on_active: root.send_osc = self.active
-        CheckBox:
-            active: root.send_midi
-            on_active: root.send_midi = self.active
         CheckBox:
             active: root.display
             on_active: root.display = self.active

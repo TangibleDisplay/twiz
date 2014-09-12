@@ -184,7 +184,10 @@ class OscConfig(ConfigPanel):
 
     def remove_line(self, line):
         self.ids.content.remove_widget(line)
-        app.config.remove_option(line.key)
+        app.config.remove_option(self.device.address + '-osc', line.key)
+
+    def check_osc_values(self, *args):
+        return self.device.check_osc_values(*args)
 
 
 class PloogDevice(FloatLayout):
@@ -193,8 +196,6 @@ class PloogDevice(FloatLayout):
     address = StringProperty('')
     power = NumericProperty(0)
     last_update = NumericProperty(0)
-    send_osc = BooleanProperty(False)
-    send_midi = BooleanProperty(False)
     display = BooleanProperty(False)
     rx = ListProperty([0, ])
     ry = ListProperty([0, ])
@@ -217,9 +218,9 @@ class PloogDevice(FloatLayout):
                 self.ay.append(d[1] % 0xffff)
                 self.az.append(d[2] % 0xffff)
 
-                self.rx.append(d[3] % 0xffff)
-                self.ry.append(d[4] % 0xffff)
-                self.rz.append(d[5] % 0xffff)
+                self.rx.append((d[3] * 0xff) % 0xffff)
+                self.ry.append((d[4] * 0xff) % 0xffff)
+                self.rz.append((d[5] * 0xff) % 0xffff)
 
         self.last_update = time()
 
@@ -229,17 +230,27 @@ class PloogDevice(FloatLayout):
         if not self.active:
             return
 
-        if self.send_osc:
-            self.send_osc_updates()
+        self.send_osc_updates()
+        self.send_midi_updates()
 
-        if self.send_midi:
-            self.send_midi_updates()
+    def check_osc_values(self, ip, port, address, content):
+        try:
+            int(port)
+        except ValueError:
+            return False
+        if not address.startswith('/'):
+            return False
+        for c in content.split(','):
+            if c not in app.sensor_list:
+                return False
 
     def send_osc_updates(self):
         sendto = app.osc_socket.sendto
         # XXX potential performances killer, maybe cache these somewhere
         for k, v in app.config.items(self.address + '-osc'):
             ip, port, address, content = v.split(',')
+            if not self.check_osc_values(ip, port, address, content):
+                continue
             data = OSCMessage()
             data.setAddress(address)
             for i in content.split(' '):
