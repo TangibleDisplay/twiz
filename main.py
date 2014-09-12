@@ -102,6 +102,7 @@ class MidiSensorLine(BoxLayout):
             event_id=self.update,
             event_value=self.update
         )
+        self.load_values()
 
     def update(self, *args):
         app.config.set(
@@ -116,19 +117,16 @@ class MidiSensorLine(BoxLayout):
             )
         )
 
-    def on_device(self, *args):
-        if self.device:
-            self.load_values(self.device)
-
-    def load_values(self, device):
-        section = device.address + '-midi'
-        values = app.config.get(section, self.sensor)
-        active, signal, chan, event_id, event_value = values.split(',')
-        self.active = True if active == '1' else False
-        self.signal = MIDI_SIGNALS.get(int(signal), 'Note On')
-        self.chan = chan
-        self.event_id = event_id
-        self.event_value = event_value
+    def load_values(self, *args):
+        if self.device and self.sensor:
+            section = self.device.address + '-midi'
+            values = app.config.get(section, self.sensor)
+            active, signal, chan, event_id, event_value = values.split(',')
+            self.active = True if active == '1' else False
+            self.signal = MIDI_SIGNALS.get(int(signal), 'Note On')
+            self.chan = chan
+            self.event_id = event_id
+            self.event_value = event_value
 
 
 class OscConfigLine(BoxLayout):
@@ -158,7 +156,12 @@ class ConfigPanel(GridLayout):
 
 
 class MidiConfig(ConfigPanel):
-    pass
+    def on_device(self, *args):
+        if self.device:
+            self.ids.content.clear_widgets()
+            for s in app.sensor_list:
+                self.ids.content.add_widget(
+                    MidiSensorLine(sensor=s, device=self.device))
 
 
 class OscConfig(ConfigPanel):
@@ -241,7 +244,8 @@ class PloogDevice(FloatLayout):
             data.setAddress(address)
             for i in content.split(' '):
                 i = i.strip()
-                data.append(getattr(self, i)[-1])
+                if i in app.sensor_list:
+                    data.append(getattr(self, i)[-1])
             # print "osc sending data", data
             sendto(data.getBinary(), (ip, int(port)))
 
@@ -280,7 +284,7 @@ class BLEApp(App):
     scan_results = DictProperty({})
     visus = DictProperty({})
     sensor_list = ListProperty(
-        ['rx', 'ry', 'rz', 'ax', 'ay', 'az', 'cx', 'cy', 'cz'])
+        ['rx', 'ry', 'rz', 'ax', 'ay', 'az'])
 
     def build(self):
         self.init_ble()
@@ -411,7 +415,7 @@ class BLEApp(App):
                                 offset += dlen + 1
                         else:
                             pass
-                            print "\tUnknown or reserved event type"
+                            # print "\tUnknown or reserved event type"
 
                         # each report is 2 (event type, bdaddr type) + 6
                         # (the address) + 1 (data length field) + data

@@ -233,9 +233,9 @@ ScrollView:
             scene_scale: 4.0
             cam_rotation:
                 (
-                root.device.rx[-1] * 360. / 0xffff,
-                root.device.ry[-1] * 360. / 0xffff,
-                root.device.rz[-1] * 360. / 0xffff
+                root.device.ax[-1] * 360. / 0xffff,
+                root.device.ay[-1] * 360. / 0xffff,
+                root.device.az[-1] * 360. / 0xffff
                 )
             cam_translation: 0, -2, -8
             light_sources:
@@ -245,6 +245,7 @@ ScrollView:
     cols: 1
     visible: False
     opacity: 1 if self.visible else 0
+    disabled: not self.visible
     size_hint_y: None
     height: self.minimum_height if self.visible else 0
 
@@ -267,35 +268,9 @@ ScrollView:
 
     GridLayout:
         cols: 1
+        id: content
         size_hint_y: None
         height: self.minimum_height
-        MidiSensorLine:
-            sensor: 'rx'
-            device: root.device
-        MidiSensorLine:
-            sensor: 'ry'
-            device: root.device
-        MidiSensorLine:
-            sensor: 'rz'
-            device: root.device
-        MidiSensorLine:
-            sensor: 'ax'
-            device: root.device
-        MidiSensorLine:
-            sensor: 'ay'
-            device: root.device
-        MidiSensorLine:
-            sensor: 'az'
-            device: root.device
-        # MidiSensorLine:
-        #     sensor: 'cx'
-        #     device: root.device
-        # MidiSensorLine:
-        #     sensor: 'cy'
-        #     device: root.device
-        # MidiSensorLine:
-        #     sensor: 'cz'
-        #     device: root.device
 
 <MidiSensorLine>:
     size_hint_y: None
@@ -317,11 +292,11 @@ ScrollView:
 
     TextInput:
         text: root.event_id
-        on_text: root.event_id = self.text
+        on_text_validate: root.event_id = self.text
 
     TextInput:
         text: root.event_value
-        on_text: root.event_value = self.text
+        on_text_validate: root.event_value = self.text
 
 <OscConfig>:
     BoxLayout:
