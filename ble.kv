@@ -1,6 +1,8 @@
 #:set color_x (1, 0, 0, 1)
 #:set color_y (0, 1, 0, 1)
 #:set color_z (0, 0, 1, 1)
+#:set line '48dp'
+#:set small_line '32dp'
 #:import chain itertools.chain
 
 ScrollView:
@@ -51,7 +53,7 @@ ScrollView:
                         height: self.minimum_height
                         BoxLayout:
                             size_hint_y: None
-                            height: '48dp'
+                            height: line
                             Label:
                                 text: 'address'
                             Label:
@@ -252,7 +254,7 @@ ScrollView:
 <MidiConfig>:
     BoxLayout:
         size_hint_y: None
-        height: '48dp'
+        height: line
         Label:
             text: 'sensor'
         Label:
@@ -274,7 +276,7 @@ ScrollView:
 
 <MidiSensorLine>:
     size_hint_y: None
-    height: '48dp'
+    height: small_line
     Label:
         text: root.sensor
     CheckBox:
@@ -327,7 +329,7 @@ ScrollView:
 
 <OscConfigLine>:
     size_hint_y: None
-    height: '48dp'
+    height: small_line
     TextInput:
         text: root.ip
         on_text: root.ip = self.text
@@ -350,7 +352,7 @@ ScrollView:
 
 <PloogDevice>:
     size_hint_y: None
-    height: '48dp'
+    height: line
 
     BoxLayout:
         pos_hint: {'center': (.5, .5)}
