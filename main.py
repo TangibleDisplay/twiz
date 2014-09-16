@@ -38,9 +38,8 @@ MIDI_SIGNALS = {
     'Note Aftertouch': 224,
 }
 
-dev_id = 0
 try:
-    sock = bluez.hci_open_dev(dev_id)
+    sock = bluez.hci_open_dev()
 except:
     print "error accessing bluetooth device..."
     sys.exit(1)
