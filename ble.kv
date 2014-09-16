@@ -1,13 +1,38 @@
 #:set color_x (1, 0, 0, 1)
 #:set color_y (0, 1, 0, 1)
 #:set color_z (0, 0, 1, 1)
+#:set bgcolor (0/255., 23/255., 33/255., 1)
 #:set red (1, 0, 0, 1)
 #:set white (1, 1, 1, 1)
 #:set line '48dp'
 #:set small_line '32dp'
 #:import chain itertools.chain
 
+#:set ploog_address_width '150sp'
+#:set ploog_id_width '100sp'
+#:set ploog_power_width '60sp'
+#:set ploog_activate_width '50sp'
+#:set ploog_visu_width '50sp'
+
+#:set config_ip_width '100sp'
+#:set config_port_width '50sp'
+#:set config_address_width '100sp'
+#:set config_content_width '100sp'
+#:set config_delete_width '50sp'
+#:set config_sensor_width '50sp'
+#:set config_active_width '50sp'
+#:set config_event_type_width '120sp'
+#:set config_midi_channel_width '60sp'
+#:set config_event_id_width '80sp'
+#:set config_event_value_width '80sp'
+
 ScrollView:
+    canvas.before:
+        Color:
+            rgba: bgcolor
+        Rectangle:
+            pos: self.pos
+            size: self.size
     GridLayout:
         size_hint_y: None
         height: self.minimum_height
@@ -58,14 +83,24 @@ ScrollView:
                             height: line
                             Label:
                                 text: 'address'
+                                size_hint_x: None
+                                width: ploog_address_width
                             Label:
                                 text: 'id'
+                                size_hint_x: None
+                                width: ploog_id_width
                             Label:
                                 text: 'power'
+                                size_hint_x: None
+                                width: ploog_power_width
                             Label:
                                 text: 'activate'
+                                size_hint_x: None
+                                width: ploog_activate_width
                             Label:
                                 text: 'visu'
+                                size_hint_x: None
+                                width: ploog_visu_width
 
                     GridLayout:
                         id: results
@@ -75,7 +110,7 @@ ScrollView:
 
             Image:
                 id: logo
-                source: 'data/logo.png'
+                # source: 'data/Logo vertical.png'
                 size_hint: None, None
                 size: self.texture_size
                 top: self.size and root.top - 10
@@ -176,7 +211,10 @@ ScrollView:
     line_y: {'euler': root.device.ry, 'accelero': root.device.ay}[root.focus] if root.device else [0]
     line_z: {'euler': root.device.rz, 'accelero': root.device.az}[root.focus] if root.device else [0]
     data_len: min(max(map(len, (self.line_x, self.line_y, self.line_z))), 100)
-    max_value: 0xffff if self.focus == 'accelero' else 360
+    max_value: 0xffff if self.focus == 'accelero' else 180
+    min_value: 0 if self.focus == 'accelero' else - 180
+    size_hint_x: None
+    width: '500sp'
     canvas:
         Color:
             rgba: color_x
@@ -184,7 +222,7 @@ ScrollView:
             points:
                 chain(*[
                 (root.x + x * self.width / root.data_len,
-                self.y + self.height * y / root.max_value)
+                self.y + self.height * (y - self.min_value) / (root.max_value - root.min_value))
                 for x, y in enumerate(root.line_x[-100:])
                 ]) if root.data_len and root.max_value and root.line_x else ()
         Color:
@@ -193,7 +231,7 @@ ScrollView:
             points:
                 chain(*[
                 (root.x + x * self.width / root.data_len,
-                self.y + self.height * y / root.max_value)
+                self.y + self.height * (y - self.min_value) / (root.max_value - root.min_value))
                 for x, y in enumerate(root.line_y[-100:])
                 ]) if root.data_len and root.max_value and root.line_y else ()
         Color:
@@ -202,7 +240,7 @@ ScrollView:
             points:
                 chain(*[
                 (root.x + x * self.width / root.data_len,
-                self.y + self.height * y / root.max_value)
+                self.y + self.height * (y - self.min_value) / (root.max_value - root.min_value))
                 for x, y in enumerate(root.line_z[-100:])
                 ]) if root.data_len and root.max_value and root.line_z else ()
 
@@ -254,21 +292,37 @@ ScrollView:
     height: self.minimum_height
 
 <MidiConfig>:
-    BoxLayout:
+    GridLayout:
+        rows: 1
         size_hint_y: None
+        size_hint_x: None
+        width: self.minimum_width
         height: line
         Label:
             text: 'sensor'
+            size_hint_x: None
+            width: config_sensor_width
         Label:
             text: 'active'
+            size_hint_x: None
+            width: config_active_width
         Label:
             text: 'event type'
+            size_hint_x: None
+            width: config_event_type_width
         Label:
-            text: 'midi channel'
+            text: 'channel'
+            text_size: self.size
+            size_hint_x: None
+            width: config_midi_channel_width
         Label:
-            text: 'event id\n(0-127)'
+            text: 'event id'
+            size_hint_x: None
+            width: config_event_id_width
         Label:
-            text: 'event value\n(0-127)'
+            text: 'event value'
+            size_hint_x: None
+            width: config_event_value_width
 
     GridLayout:
         cols: 1
@@ -281,41 +335,71 @@ ScrollView:
     height: small_line
     Label:
         text: root.sensor
+        size_hint_x: None
+        width: config_sensor_width
+
     CheckBox:
         active: root.active
         on_active: root.active = self.active
+        size_hint_x: None
+        width: config_active_width
+
     Spinner:
         text: root.signal
         values: ('Note On', 'Note Off', 'Note Aftertouch', 'Controller')
         on_text: root.signal = self.text
+        size_hint_x: None
+        width: config_event_type_width
 
     Spinner:
         text: root.chan
         values: ('%s' % x for x in range(16))
         on_text: root.chan = self.text
+        size_hint_x: None
+        width: config_midi_channel_width
+        hint_text: '0-127'
 
     TextInput:
         text: root.event_id
         on_text_validate: root.event_id = self.text
+        size_hint_x: None
+        width: config_event_id_width
+        hint_text: '0-127 or v'
 
     TextInput:
         text: root.event_value
         on_text_validate: root.event_value = self.text
+        size_hint_x: None
+        width: config_event_value_width
+        hint_text: '0-127 or v'
 
 <OscConfig>:
-    BoxLayout:
+    GridLayout:
+        rows: 1
         size_hint_y: None
+        size_hint_x: None
+        width: self.minimum_width
         height: '48sp'
         Label:
             text: 'ip'
+            size_hint_x: None
+            width: config_ip_width
         Label:
             text: 'port'
+            size_hint_x: None
+            width: config_port_width
         Label:
             text: 'address'
+            size_hint_x: None
+            width: config_address_width
         Label:
             text: 'content'
+            size_hint_x: None
+            width: config_content_width
         Label:
             text: 'delete'
+            size_hint_x: None
+            width: config_delete_width
 
     GridLayout:
         cols: 1
@@ -326,7 +410,7 @@ ScrollView:
     Button:
         text: '+'
         size_hint_y: None
-        height: '48sp'
+        height: small_line
         visible: len(content.children) < 6
         opacity: 1 if self.visible else 0
         disabled: not self.visible
@@ -338,26 +422,35 @@ ScrollView:
     TextInput:
         text: root.ip
         on_text: root.ip = self.text
+        size_hint_x: None
+        width: config_ip_width
 
     TextInput:
         text: root.port
         on_text: root.port = self.text
         background_color: white if self.text .isdigit() else red # don't remove the space!
+        size_hint_x: None
+        width: config_port_width
 
     TextInput:
         text: root.address
         on_text: root.address = self.text
         background_color: white if self.text .startswith('/') else red # don't remove the space!
+        size_hint_x: None
+        width: config_address_width
 
     TextInput:
         text: root.content
         on_text: root.content = self.text
         background_color: white if all(x in app.sensor_list for x in self.text .split(',')) else red # don't remove the space!
+        size_hint_x: None
+        width: config_content_width
 
 
     Button:
         text: 'x'
         on_press: root.config.remove_line(root)
+        width: config_delete_width
 
 <PloogDevice>:
     size_hint_y: None
@@ -367,18 +460,28 @@ ScrollView:
         pos_hint: {'center': (.5, .5)}
         Label:
             text: root.address
+            size_hint_x: None
+            width: ploog_address_width
         Label:
             text: root.name
+            size_hint_x: None
+            width: ploog_id_width
         Label:
             text: '%sdb' % root.power
+            size_hint_x: None
+            width: ploog_power_width
 
         CheckBox:
             active: root.active
             on_active: root.active = self.active
+            size_hint_x: None
+            width: ploog_activate_width
 
         CheckBox:
             active: root.display
             on_active: root.display = self.active
+            size_hint_x: None
+            width: ploog_visu_width
 
 <TextInput>:
     multiline: False
