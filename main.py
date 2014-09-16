@@ -236,12 +236,18 @@ class PloogDevice(FloatLayout):
         try:
             int(port)
         except ValueError:
+            print "invalid port", port
             return False
         if not address.startswith('/'):
+            print "invalid address", address
             return False
-        for c in content.split(','):
-            if c not in app.sensor_list:
+        for c in content.split(' '):
+            if c.isdigit() or c.startswith("'") and c.endswith("'"):
+                continue
+            if c.split('_')[0] not in app.sensor_list:
+                print "invalid sensor", c
                 return False
+        return True
 
     def send_osc_updates(self):
         sendto = app.osc_socket.sendto
@@ -254,8 +260,23 @@ class PloogDevice(FloatLayout):
             data.setAddress(address)
             for i in content.split(' '):
                 i = i.strip()
-                if i in app.sensor_list:
-                    data.append(getattr(self, i)[-1])
+                if i.isdigit():
+                    data.append(int(i))
+                elif i.startswith("'"):
+                    data.append(i.strip("'"))
+                else:
+                    if '_' in i:
+                        d, t = i.split('_')
+                        i = d
+                        if t == 'd':
+                            func = lambda x: float(x) / 0xffff
+                        else:
+                            func = lambda x: x
+                    else:
+                        func = lambda x: x
+
+                    if i in app.sensor_list:
+                        data.append(func(getattr(self, i)[-1]))
             # print "osc sending data", data
             sendto(data.getBinary(), (ip, int(port)))
 
