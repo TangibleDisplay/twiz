@@ -23,7 +23,6 @@ from bt_consts import (
     OCF_LE_SET_SCAN_ENABLE,
     LE_META_EVENT,
     EVT_LE_ADVERTISING_REPORT,
-    # ADV_SCAN_RSP,
     ADV_IND,
 )
 
