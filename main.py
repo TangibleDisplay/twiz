@@ -213,13 +213,13 @@ class PloogDevice(FloatLayout):
 
             elif d == 'sensor':
                 d = data['sensor']
-                self.ax.append(d[0] % 0xffff)
-                self.ay.append(d[1] % 0xffff)
-                self.az.append(d[2] % 0xffff)
+                self.ax.append(d[0] + 0x8000)
+                self.ay.append(d[1] + 0x8000)
+                self.az.append(d[2] + 0x8000)
 
-                self.rx.append((d[3] * 0xff) % 0xffff)
-                self.ry.append((d[4] * 0xff) % 0xffff)
-                self.rz.append((d[5] * 0xff) % 0xffff)
+                self.rx.append((d[3] << 8) + 0x8000)
+                self.ry.append((d[4] << 8) + 0x8000)
+                self.rz.append((d[5] << 8) + 0x8000)
 
         self.last_update = time()
 
