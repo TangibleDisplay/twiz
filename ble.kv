@@ -176,7 +176,7 @@ ScrollView:
     line_y: {'euler': root.device.ry, 'accelero': root.device.ay}[root.focus] if root.device else [0]
     line_z: {'euler': root.device.rz, 'accelero': root.device.az}[root.focus] if root.device else [0]
     data_len: min(max(map(len, (self.line_x, self.line_y, self.line_z))), 100)
-    max_value: 0xffff
+    max_value: 0xffff if self.focus == 'accelero' else 360
     canvas:
         Color:
             rgba: color_x
@@ -228,6 +228,9 @@ ScrollView:
                 device: root.device
 
         View:
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
             id: view
             height: 500
             size_hint_x: None
@@ -237,13 +240,13 @@ ScrollView:
             scene_scale: 4.0
             cam_rotation:
                 (
-                root.device.rx[-1] * 360. / 0xffff,
-                root.device.ry[-1] * 360. / 0xffff,
-                root.device.rz[-1] * 360. / 0xffff
+                root.device.ry[-1] + 90,
+                root.device.rx[-1],
+                - root.device.rz[-1]
                 )
-            cam_translation: 0, -2, -8
+            cam_translation: 0, 0, -8
             light_sources:
-                {x: ([float(y) * 15 for y in bin(x)[2:].rjust(3, '0')] + [1.0]) for x in range(8)}
+                {x: ([float(y) * 10 - 5 for y in bin(x)[2:].rjust(3, '0')] + [1.0]) for x in range(8)}
 
 <ConfigPanel>:
     cols: 1
