@@ -13,4 +13,17 @@ with your PloogIn device.
 - bluez
 - rtmidi2
 
+#### Example on ubuntu:
+
+    sudo add-apt-repository ppa:kivy-team/kivy-daily    # nightly build
+    sudo apt-get update
+    sudo apt-get install python-kivy
+
+    sudo apt-get install bluez
+
+    sudo apt-get install python-pip
+    sudo pip install rtmidi2
+
+More here: http://kivy.org/docs/installation/installation-linux.html
+
 ### Usage
