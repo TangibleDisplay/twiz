@@ -1,6 +1,6 @@
 from kivy.uix.widget import Widget
 from kivy.resources import resource_find
-from objloader import ObjFileLoader
+from objloader import AssimpObjLoader as ObjFileLoader
 from kivy.uix.image import Image
 from kivy.graphics.fbo import Fbo
 from kivy.graphics import (
