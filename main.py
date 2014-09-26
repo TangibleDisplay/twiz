@@ -11,6 +11,8 @@ from kivy.lib.osc.OSC import OSCMessage
 
 from socket import socket, AF_INET, SOCK_DGRAM
 from uuid import uuid4 as uuid
+from random import gauss
+import sys
 import rtmidi2
 import bluetooth._bluetooth as bluez
 import sys
@@ -302,6 +304,26 @@ class PloogDevice(FloatLayout):
             app.add_visu(self)
 
 
+class PloogSimulator(PloogDevice):
+    def __init__(self, **kwargs):
+        super(PloogSimulator, self).__init__(**kwargs)
+        Clock.schedule_interval(self.simulate_values, .1)
+
+    def simulate_values(self, dt):
+        self.update_data(
+            {
+                'name': 'simulator',
+                'address': '00:00:00:00',
+                'power': int(gauss(80, 5)),
+                'sensor':
+                    [
+                        gauss(getattr(self, attr)[-1], 1) % 0xffff
+                        for attr in app.sensor_list
+                    ]
+            }
+        )
+
+
 class Graph(Widget):
     device = ObjectProperty(None, rebind=True)
     line_x = ListProperty([], rebind=True)
@@ -325,6 +347,8 @@ class BLEApp(App):
         self.osc_socket = socket(AF_INET, SOCK_DGRAM)
         self.midi_out = rtmidi2.MidiOut().open_virtual_port(':0')
         Clock.schedule_interval(self.clean_results, 1)
+        if '--simulate' in sys.argv:
+            Clock.schedule_once(self.simulate_ploogin, 0)
         return super(BLEApp, self).build()
 
     def build_config(self, config):
@@ -354,6 +378,9 @@ class BLEApp(App):
         bluez.hci_filter_all_events(self.flt)
         bluez.hci_filter_set_ptype(self.flt, bluez.HCI_EVENT_PKT)
         sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, self.flt)
+
+    def simulate_ploogin(self, dt):
+        self.root.ids.scan.add_widget(PloogSimulator())
 
     def set_scanning(self, value):
         if value:

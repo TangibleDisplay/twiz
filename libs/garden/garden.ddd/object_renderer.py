@@ -31,6 +31,7 @@ class ObjectRenderer(Widget):
     mode = StringProperty('triangles')
 
     def __init__(self, **kwargs):
+        print "it's me"
         self.canvas = Canvas()
         with self.canvas:
             self.fbo = Fbo(size=self.size,
