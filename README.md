@@ -12,6 +12,7 @@ with your PloogIn device.
 - Kivy 1.9.0
 - bluez
 - rtmidi2
+- assimp
 
 #### Example on ubuntu:
 
@@ -24,6 +25,16 @@ with your PloogIn device.
     sudo apt-get install python-pip
     sudo pip install rtmidi2
 
-More here: http://kivy.org/docs/installation/installation-linux.html
+    sudo apt-get install cmake
+    git clone https://github.com/assimp/assimp
+    cd assimp
+    cmake -G 'Unix Makefiles'
+    make
+    sudo cp **/libassimp.so /usr/local/lib
+    cd ports/PyAssimp
+    python setup.py install --user
 
 ### Usage
+
+    sudo python main.py # bluez might need sudo
+
