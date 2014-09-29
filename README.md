@@ -9,21 +9,29 @@ with your PloogIn device.
 
 #### Requirements
 
-- Kivy 1.9.0
+- Kivy
 - bluez
 - rtmidi2
 - assimp
 
 #### Example on ubuntu:
 
+##### Kivy:
+
     sudo add-apt-repository ppa:kivy-team/kivy-daily    # nightly build
     sudo apt-get update
     sudo apt-get install python-kivy
 
+##### bluez:
+
     sudo apt-get install bluez
+
+##### rtmidi2:
 
     sudo apt-get install python-pip
     sudo pip install rtmidi2
+
+##### assimp:
 
     sudo apt-get install cmake
     git clone https://github.com/assimp/assimp
@@ -36,5 +44,14 @@ with your PloogIn device.
 
 ### Usage
 
-    sudo python main.py # bluez might need sudo
+    python main.py
+
+
+Bluez might need sudo, the following allows keeping the user environment:
+
+    sudo -E sh -c 'python main.py'
+
+If the 3d cube blinks, using optirun might fix the problem on certain graphic cards:
+
+    optirun python main.py      # more here: wiki.ubuntu.com/Bumblebee
 
