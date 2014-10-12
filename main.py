@@ -270,7 +270,7 @@ class PloogDevice(FloatLayout):
                         d, t = i.split('_')
                         i = d
                         if t == 'd':
-                            func = lambda x: float(x) / 0xffff
+                            func = lambda x: float(x) / 180.0
                         else:
                             func = lambda x: x
                     else:
