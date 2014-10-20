@@ -214,9 +214,9 @@ class PloogDevice(FloatLayout):
 
             elif d == 'sensor':
                 d = data['sensor']
-                self.ax.append(d[0] + 0x8000)
-                self.ay.append(d[1] + 0x8000)
-                self.az.append(d[2] + 0x8000)
+                self.ax.append(d[0])
+                self.ay.append(d[1])
+                self.az.append(d[2])
 
                 self.rx.append(d[5])
                 self.ry.append(d[4])
@@ -270,7 +270,7 @@ class PloogDevice(FloatLayout):
                         d, t = i.split('_')
                         i = d
                         if t == 'd':
-                            func = lambda x: float(x) / 180.0
+                            func = lambda x: float(x) / 0xffff
                         else:
                             func = lambda x: x
                     else:
@@ -464,7 +464,7 @@ class BLEApp(App):
                                     'BB', pkt[offset:offset + 2])
                                 if dtype == 0xff:
                                     sensor_data = unpack(
-                                        '<' + 'h' * ((dlen - 3) // 2),
+                                        '>' + 'h' * ((dlen - 3) // 2),
                                         pkt[offset + 4:offset + dlen + 1])
                                     if len(sensor_data) == 6:
                                         data['sensor'] = sensor_data

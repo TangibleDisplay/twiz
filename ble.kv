@@ -212,8 +212,8 @@ ScrollView:
     line_y: {'euler': root.device.ry, 'accelero': root.device.ay}[root.focus] if root.device else [0]
     line_z: {'euler': root.device.rz, 'accelero': root.device.az}[root.focus] if root.device else [0]
     data_len: min(max(map(len, (self.line_x, self.line_y, self.line_z))), 100)
-    max_value: 0xffff if self.focus == 'accelero' else 180
-    min_value: 0 if self.focus == 'accelero' else - 180
+    max_value: 0x7fff
+    min_value: -0x8000
     size_hint_x: None
     width: '500sp'
     canvas:
@@ -279,9 +279,9 @@ ScrollView:
             scene_scale: 4.0
             cam_rotation:
                 (
-                root.device.ry[-1] + 90,
-                root.device.rx[-1],
-                - root.device.rz[-1]
+                root.device.ry[-1] * 360. / 0xffff,
+                root.device.rx[-1] * 360. / 0xffff,
+                - root.device.rz[-1] * 360. / 0xffff
                 )
             cam_translation: 0, 0, -8
             light_sources:
