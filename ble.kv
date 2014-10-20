@@ -144,6 +144,7 @@ ScrollView:
                 height: self.minimum_height
 
 <GraphZone>:
+    avgsize: 100
     size_hint_y: None
     height: self.minimum_height
     cols: 1
@@ -182,11 +183,11 @@ ScrollView:
                 size: '48sp', '48sp'
                 on_press: root.focus = 'euler'
             Label:
-                text: '%x' % root.device.rx[-1] if root.device else ''
+                text: '%s' % (sum(root.device.rx[-root.avgsize:])/root.avgsize) if root.device else ''
             Label:
-                text: '%x' % root.device.ry[-1] if root.device else ''
+                text: '%s' % (sum(root.device.ry[-root.avgsize:])/root.avgsize) if root.device else ''
             Label:
-                text: '%x' % root.device.rz[-1] if root.device else ''
+                text: '%s' % (sum(root.device.rz[-root.avgsize:])/root.avgsize) if root.device else ''
 
             Button:
                 text: 'accel'
@@ -195,11 +196,11 @@ ScrollView:
                 size: '48sp', '48sp'
                 on_press: root.focus = 'accelero'
             Label:
-                text: '%x' % root.device.ax[-1] if root.device else ''
+                text: '%s' % (sum(root.device.ax[-root.avgsize:])/root.avgsize) if root.device else ''
             Label:
-                text: '%x' % root.device.ay[-1] if root.device else ''
+                text: '%s' % (sum(root.device.ay[-root.avgsize:])/root.avgsize) if root.device else ''
             Label:
-                text: '%x' % root.device.az[-1] if root.device else ''
+                text: '%s' % (sum(root.device.az[-root.avgsize:])/root.avgsize) if root.device else ''
 
         Graph:
             device: root.device
