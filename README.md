@@ -18,9 +18,20 @@ with your PloogIn device.
 
 ##### Kivy:
 
+###### using apt-get:
+
     sudo add-apt-repository ppa:kivy-team/kivy-daily    # nightly build
     sudo apt-get update
     sudo apt-get install python-kivy
+
+###### using git:
+
+    git clone git://github.com/kivy/kivy.git
+    cd kivy
+    make
+    python setup.py install --user
+    # optional: cd .. && rm -rf kivy
+    sudo apt-get install python-pygame
 
 ##### bluez:
 
