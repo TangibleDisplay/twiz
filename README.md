@@ -24,11 +24,11 @@ with your PloogIn device.
 
 ##### bluez:
 
-    sudo apt-get install bluez
+    sudo apt-get install bluez libbluetooth-dev
 
 ##### rtmidi2:
 
-    sudo apt-get install python-pip
+    sudo apt-get install python-pip libasound2-dev
     sudo pip install rtmidi2
 
 ##### assimp:
