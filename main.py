@@ -4,7 +4,8 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.properties import DictProperty, StringProperty, \
-    NumericProperty, ListProperty, BooleanProperty, ObjectProperty
+    NumericProperty, ListProperty, BooleanProperty, ObjectProperty,\
+    ConfigParserProperty
 from kivy.clock import Clock, mainthread
 import kivy.garden.ddd  # noqa
 from kivy.lib.osc.OSC import OSCMessage
@@ -15,7 +16,6 @@ from random import gauss
 import sys
 import rtmidi2
 import bluetooth._bluetooth as bluez
-import sys
 from time import time
 from struct import pack, unpack
 from threading import Thread
@@ -337,6 +337,8 @@ class BLEApp(App):
     visus = DictProperty({})
     sensor_list = ListProperty(
         ['rx', 'ry', 'rz', 'ax', 'ay', 'az'])
+    auto_activate = ConfigParserProperty(
+        0, 'general', 'auto_activate', 'app', val_type=int)
 
     def build(self):
         self.init_ble()
@@ -352,7 +354,9 @@ class BLEApp(App):
         return super(BLEApp, self).build()
 
     def build_config(self, config):
-        config.setdefaults('general', {})
+        config.setdefaults('general', {
+            'auto_activate': False
+            })
 
     def on_stop(self, *args):
         print "writing config"
@@ -417,7 +421,8 @@ class BLEApp(App):
 
     @mainthread
     def update_device(self, data):
-        pd = self.scan_results.get(data['address'], PloogDevice())
+        pd = self.scan_results.get(data['address'],
+                                   PloogDevice(active=app.auto_activate))
         pd.update_data(data)
         results = self.root.ids.scan.ids.results
         if pd.address not in self.scan_results:
