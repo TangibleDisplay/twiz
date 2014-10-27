@@ -58,11 +58,11 @@ with your PloogIn device.
     python main.py
 
 
-Bluez might need sudo, the following allows keeping the user environment:
+But the access to the BLE dongle might need sudo:
 
-    sudo -E sh -c 'python main.py'
+    sudo python main.py
 
-If the 3d cube blinks, using optirun might fix the problem on certain graphic cards:
+...and if the 3d cube blinks, using optirun might fix the problem on certain graphic cards:
 
-    optirun python main.py      # more here: wiki.ubuntu.com/Bumblebee
+    sudo optirun python main.py      # more here: wiki.ubuntu.com/Bumblebee
 
