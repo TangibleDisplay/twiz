@@ -259,31 +259,37 @@ ScrollView:
     GraphZone:
         device: root.device
     GridLayout:
-        cols: 1 if self.width < 1000 else 2
+        cols: 1 if self.width < max(osconfig.minimum_width, midiconfig.minimum_width) + config.height else 2
         id: grid
         size_hint_y: None
-        height: self.minimum_height
+        height: max(self.minimum_height, 1)
         GridLayout:
+            id: config
+            cols: 1
             size_hint_y: None
             orientation: 'vertical'
             height: self.minimum_height
-            cols: 1
             OscConfig:
+                id: osconfig
                 device: root.device
+                height: self.minimum_height
             MidiConfig:
+                id: midiconfig
                 device: root.device
+                height: self.minimum_height
 
         View:
             canvas.before:
                 Color:
                     rgba: 1, 1, 1, 1
             id: view
-            height: 500
-            size_hint_x: None
+            size_hint_y: None if grid.cols == 1 else 1
+            size_hint_x: None if grid.cols == 2 else 1
+            width: self.height
+            height: self.width
             scene: 'cube.obj'
-            size_hint_y: None
             display_all: True
-            scene_scale: 4.0
+            scene_scale: 3.0
             cam_rotation:
                 (
                 root.device.ry[-1] * 360. / 0xffff,
