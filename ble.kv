@@ -27,6 +27,7 @@
 #:set config_event_value_width '80sp'
 
 ScrollView:
+    scroll_timeout: 20
     canvas.before:
         Color:
             rgba: bgcolor
@@ -64,6 +65,7 @@ ScrollView:
             height: scrollview.height
             orientation: 'vertical'
             ScrollView:
+                scroll_timeout: 20
                 id: scrollview
                 pos: root.pos
                 size_hint_y: None
@@ -132,6 +134,7 @@ ScrollView:
             height: self.texture_size[1] + 10
 
         ScrollView:
+            scroll_timeout: 20
             id: scrollview
             pos: root.pos
             size_hint_y: None
