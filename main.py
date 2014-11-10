@@ -73,7 +73,7 @@ class ObjectView(GridLayout):
 
 class GraphZone(GridLayout):
     device = ObjectProperty(None, rebind=True)
-    focus = StringProperty('euler')
+    focus = StringProperty('accelero')
 
 
 class DevicesPanel(BoxLayout):
