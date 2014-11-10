@@ -355,7 +355,7 @@ class BLEApp(App):
 
     def build_config(self, config):
         config.setdefaults('general', {
-            'auto_activate': False
+            'auto_activate': 0
             })
 
     def on_stop(self, *args):
