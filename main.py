@@ -401,7 +401,7 @@ class BLEApp(App):
         if not self.config.has_section(section):
             app.config.add_section(section)
             app.config.setdefaults(section, {
-                })
+            })
 
         section = device.address + '-midi'
         if not self.config.has_section(section):
