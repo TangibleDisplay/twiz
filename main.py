@@ -339,6 +339,8 @@ class BLEApp(App):
         ['rx', 'ry', 'rz', 'ax', 'ay', 'az'])
     auto_activate = ConfigParserProperty(
         0, 'general', 'auto_activate', 'app', val_type=int)
+    auto_display = ConfigParserProperty(
+        0, 'general', 'auto_display', 'app', val_type=int)
 
     def build(self):
         self.init_ble()
@@ -355,7 +357,8 @@ class BLEApp(App):
 
     def build_config(self, config):
         config.setdefaults('general', {
-            'auto_activate': 0
+            'auto_activate': 0,
+            'auto_display': 0
             })
 
     def on_stop(self, *args):
@@ -425,6 +428,9 @@ class BLEApp(App):
                                    PloogDevice(active=app.auto_activate))
         pd.update_data(data)
         results = self.root.ids.scan.ids.results
+        if app.auto_display:
+            pd.display = True
+
         if pd.address not in self.scan_results:
             self.scan_results[pd.address] = pd
             results.add_widget(pd)
