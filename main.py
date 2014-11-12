@@ -19,6 +19,7 @@ import bluetooth._bluetooth as bluez
 from time import time
 from struct import pack, unpack
 from threading import Thread
+import gc
 
 from bt_consts import (
     OGF_LE_CTL,
@@ -421,6 +422,8 @@ class BLEApp(App):
         w = self.visus.get(device)
         if w and w in self.root.ids.visu.ids.content.children:
             self.root.ids.visu.ids.content.remove_widget(w)
+            del(self.visus[device])
+            gc.collect()
 
     @mainthread
     def update_device(self, data):
