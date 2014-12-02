@@ -15,7 +15,7 @@ from socket import socket, AF_INET, SOCK_DGRAM
 from uuid import uuid4 as uuid
 from random import gauss
 import sys
-import rtmidi2
+# import rtmidi2
 import bluetooth._bluetooth as bluez
 from time import time
 from struct import pack, unpack
@@ -238,7 +238,7 @@ class PloogDevice(FloatLayout):
             return
 
         self.send_osc_updates()
-        self.send_midi_updates()
+        # self.send_midi_updates()
 
     def check_osc_values(self, ip, port, address, content):
         try:
@@ -353,7 +353,7 @@ class BLEApp(App):
         self.init_ble()
         self.set_scanning(True)
         self.osc_socket = socket(AF_INET, SOCK_DGRAM)
-        self.midi_out = rtmidi2.MidiOut().open_virtual_port(':0')
+        # self.midi_out = rtmidi2.MidiOut().open_virtual_port(':0')
         Clock.schedule_interval(self.clean_results, 1)
         if '--simulate' in sys.argv:
             Clock.schedule_once(self.simulate_ploogin, 0)
