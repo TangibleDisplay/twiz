@@ -25,6 +25,7 @@ import gc
 if platform == 'android':
     from androidhelpers import AndroidScanner, start_scanning, stop_scanning
 
+__version__ = 1.0
 
 from bt_consts import (
     OGF_LE_CTL,
