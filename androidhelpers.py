@@ -49,7 +49,7 @@ class AndroidScanner(PythonJavaClass):
     __javainterfaces__ = ['android.bluetooth.BluetoothAdapter$LeScanCallback']
 
     @java_method("(Landroid/bluetooth/BluetoothDevice;I[B)V")
-    def onLeScan(device, irssi, scan_record):
+    def onLeScan(self, device, irssi, scan_record):
         print "onLeScan"
         print device.getName()
         print irssi
