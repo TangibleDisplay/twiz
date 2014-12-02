@@ -486,7 +486,6 @@ ScrollView:
             width: ploog_power_width
 
         CheckBox:
-            active: root.active
             on_active: root.active = self.active
             size_hint_x: None
             width: ploog_activate_width
@@ -496,6 +495,3 @@ ScrollView:
             on_active: root.display = self.active
             size_hint_x: None
             width: ploog_visu_width
-
-<TextInput>:
-    multiline: False

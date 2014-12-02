@@ -9,6 +9,7 @@ from kivy.properties import DictProperty, StringProperty, \
 from kivy.clock import Clock, mainthread
 import kivy.garden.ddd  # noqa
 from kivy.lib.osc.OSC import OSCMessage
+from kivy.utils import platform
 
 from socket import socket, AF_INET, SOCK_DGRAM
 from uuid import uuid4 as uuid
@@ -20,6 +21,10 @@ from time import time
 from struct import pack, unpack
 from threading import Thread
 import gc
+
+if platform == 'android':
+    from androidhelpers import AndroidScanner, start_scanning, stop_scanning
+
 
 from bt_consts import (
     OGF_LE_CTL,
@@ -345,9 +350,6 @@ class BLEApp(App):
 
     def build(self):
         self.init_ble()
-        self.parser_thread = Thread(target=self.parse_events)
-        self.parser_thread.daemon = True
-        self.parser_thread.start()
         self.set_scanning(True)
         self.osc_socket = socket(AF_INET, SOCK_DGRAM)
         self.midi_out = rtmidi2.MidiOut().open_virtual_port(':0')
@@ -355,6 +357,9 @@ class BLEApp(App):
         if '--simulate' in sys.argv:
             Clock.schedule_once(self.simulate_ploogin, 0)
         return super(BLEApp, self).build()
+
+    def on_pause(self, *args):
+        return True
 
     def build_config(self, config):
         config.setdefaults('general', {
@@ -376,26 +381,42 @@ class BLEApp(App):
                 self.remove_visu(v)
 
     def init_ble(self):
-        self.old_filter = sock.getsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, 14)
+        if platform == 'android':
+            self.scanner = AndroidScanner()
 
-        # perform a device inquiry on bluetooth device #0
-        # The inquiry should last 8 * 1.28 = 10.24 seconds
-        # before the inquiry is performed, bluez should flush its cache of
-        # previously discovered devices
-        self.flt = bluez.hci_filter_new()
-        bluez.hci_filter_all_events(self.flt)
-        bluez.hci_filter_set_ptype(self.flt, bluez.HCI_EVENT_PKT)
-        sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, self.flt)
+        else:
+            self.old_filter = sock.getsockopt(
+                bluez.SOL_HCI, bluez.HCI_FILTER, 14)
+
+            # perform a device inquiry on bluetooth device #0
+            # The inquiry should last 8 * 1.28 = 10.24 seconds
+            # before the inquiry is performed, bluez should flush its cache of
+            # previously discovered devices
+            self.flt = bluez.hci_filter_new()
+            bluez.hci_filter_all_events(self.flt)
+            bluez.hci_filter_set_ptype(self.flt, bluez.HCI_EVENT_PKT)
+            sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, self.flt)
+
+            self.parser_thread = Thread(target=self.parse_events)
+            self.parser_thread.daemon = True
+            self.parser_thread.start()
 
     def simulate_ploogin(self, dt):
         self.root.ids.scan.add_widget(PloogSimulator())
 
     def set_scanning(self, value):
-        if value:
-            # hci_le_set_scan_parameters(sock)
-            hci_enable_le_scan(sock)
+        if platform == 'android':
+            if value:
+                start_scanning(self.scanner)
+            else:
+                stop_scanning(self.scanner)
+
         else:
-            hci_disable_le_scan(sock)
+            if value:
+                # hci_le_set_scan_parameters(sock)
+                hci_enable_le_scan(sock)
+            else:
+                hci_disable_le_scan(sock)
 
     def ensure_sections(self, device):
         section = device.address + '-osc'
