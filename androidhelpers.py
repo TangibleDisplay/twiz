@@ -49,7 +49,7 @@ def stop_scanning(callback):
 
 def update_results(dt):
     for d in devices:
-        print d.extra.RSSI
+        print dir(d)
 
 
 class AndroidScanner(PythonJavaClass):
