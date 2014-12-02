@@ -53,4 +53,4 @@ class AndroidScanner(PythonJavaClass):
         print "onLeScan"
         print device.getName()
         print irssi
-        print scan_record
+        print len(scan_record), scan_record
