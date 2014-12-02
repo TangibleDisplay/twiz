@@ -22,7 +22,7 @@ from threading import Thread
 import gc
 
 if platform == 'android':
-    from androidhelpers import AndroidScanner, start_scanning, stop_scanning
+    from androidhelpers import AndroidScanner, start_scanning, stop_scanning, update_results
 
 __version__ = '1.0'
 
@@ -287,7 +287,7 @@ class PloogDevice(FloatLayout):
             sendto(data.getBinary(), (ip, int(port)))
 
     def send_midi_updates(self):
-        port = app.midi_out
+        # port = app.midi_out
         items = app.config.items(self.address + '-midi')
         for k, v in items:
             active, signal, chan, ev_id, ev_value = v.split(',')
@@ -413,8 +413,10 @@ class BLEApp(App):
         if platform == 'android':
             if value:
                 start_scanning(self.scanner)
+                Clock.schedule_interval(update_results, 0)
             else:
                 stop_scanning(self.scanner)
+                Clock.unschedule(update_results)
 
         else:
             if value:

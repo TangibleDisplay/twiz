@@ -19,6 +19,8 @@ print "get ADAPTER"
 
 REQUEST_ENABLE_BT = 0x100
 
+devices = []
+
 
 def activity_result(request_code, result_code, data):
     print("get result: %s, %s, %s" % (
@@ -45,6 +47,11 @@ def stop_scanning(callback):
     ADAPTER.stopLeScan(callback)
 
 
+def update_results(self, dt):
+    for d in devices:
+        print d.extra.RSSI
+
+
 class AndroidScanner(PythonJavaClass):
     __javainterfaces__ = ['android.bluetooth.BluetoothAdapter$LeScanCallback']
 
@@ -54,3 +61,4 @@ class AndroidScanner(PythonJavaClass):
         print device.getName()
         print irssi
         print len(scan_record), scan_record
+        devices.append(device)
