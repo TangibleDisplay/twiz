@@ -1,13 +1,18 @@
 from jnius import PythonJavaClass, java_method, autoclass
+print "jnius imports!"
 
 # SERVICE = Autoclass('org.renpy.PythonService').mService
 SERVICE = autoclass('org.renpy.android.PythonActivity').mActivity
+print "get activity"
 
 Intent = autoclass('android.content.Intent')
+print "get Intent class"
 
 BluetoothManager = SERVICE.getSystemService(SERVICE.BLUETOOTH_SERVICE)
+print "get BluetoothManager"
 
 ADAPTER = BluetoothManager.getAdapter()
+print "get ADAPTER"
 
 REQUEST_ENABLE_BT = 0x100
 
@@ -18,15 +23,22 @@ def activity_result(request_code, result_code, data):
 
 
 def start_scanning(callback):
+    print "start scanning"
     if not ADAPTER.isEnabled():
+        print "not enabled!"
         SERVICE.startActivityForResult(
             Intent(ADAPTER.ACTION_REQUEST_ENABLE), REQUEST_ENABLE_BT)
+        print "started activity for result"
         SERVICE.bind(on_activity_result=activity_result)
+        print "binded on_activity_result"
     else:
+        print "enabled! start leScan"
         ADAPTER.startLeScan(callback)
+        print "scan enabled!"
 
 
 def stop_scanning(callback):
+    print "stop leScan"
     ADAPTER.stopLeScan(callback)
 
 
@@ -35,6 +47,7 @@ class AndroidScanner(PythonJavaClass):
 
     @java_method('Landroid.bluetooth.BluetoothDevice,I,[B')
     def onLeScan(device, irssi, scan_record):
+        print "onLeScan"
         print device.getName()
         print irssi
         print scan_record
