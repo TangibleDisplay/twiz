@@ -49,7 +49,7 @@ def stop_scanning(callback):
 
 def update_results(dt):
     for d in devices:
-        print dir(d)
+        print d.getName(), d.getUuids(), d.hashCode(), d.getAddress()
 
 
 class AndroidScanner(PythonJavaClass):
