@@ -1,9 +1,9 @@
-from jnius import PythonJavaClass, java_method, Autoclass
+from jnius import PythonJavaClass, java_method, autoclass
 
 # SERVICE = Autoclass('org.renpy.PythonService').mService
-SERVICE = Autoclass('org.renpy.PythonActivity').mActivity
+SERVICE = autoclass('org.renpy.PythonActivity').mActivity
 
-Intent = Autoclass('android.content.Intent')
+Intent = autoclass('android.content.Intent')
 
 BluetoothManager = SERVICE.getSystemService(SERVICE.BLUETOOTH_SERVICE)
 
