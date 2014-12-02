@@ -5,10 +5,13 @@ print "jnius imports!"
 SERVICE = autoclass('org.renpy.android.PythonActivity').mActivity
 print "get activity"
 
+Context = autoclass('android.content.Context')
+print "get Context"
+
 Intent = autoclass('android.content.Intent')
 print "get Intent class"
 
-BluetoothManager = SERVICE.getSystemService(SERVICE.BLUETOOTH_SERVICE)
+BluetoothManager = SERVICE.getSystemService(Context.BLUETOOTH_SERVICE)
 print "get BluetoothManager"
 
 ADAPTER = BluetoothManager.getAdapter()
