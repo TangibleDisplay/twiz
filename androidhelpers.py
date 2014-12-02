@@ -47,6 +47,11 @@ def stop_scanning(callback):
     ADAPTER.stopLeScan(callback)
 
 
+def restart_scanning(callback):
+    stop_scanning(callback)
+    start_scanning(callback)
+
+
 def update_results(dt):
     for d in devices:
         print d.getName(), d.getUuids(), d.hashCode(), d.getAddress()

@@ -22,7 +22,7 @@ from threading import Thread
 import gc
 
 if platform == 'android':
-    from androidhelpers import AndroidScanner, start_scanning, stop_scanning, update_results
+    from androidhelpers import AndroidScanner, start_scanning, stop_scanning, restart_scanning
 
 __version__ = '1.0'
 
@@ -413,10 +413,10 @@ class BLEApp(App):
         if platform == 'android':
             if value:
                 start_scanning(self.scanner)
-                Clock.schedule_interval(update_results, 0)
+                Clock.schedule_interval(restart_scanning, 0)
             else:
                 stop_scanning(self.scanner)
-                Clock.unschedule(update_results)
+                Clock.unschedule(restart_scanning)
 
         else:
             if value:
