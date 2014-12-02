@@ -1,7 +1,7 @@
 from jnius import PythonJavaClass, java_method, autoclass
 
 # SERVICE = Autoclass('org.renpy.PythonService').mService
-SERVICE = autoclass('org.renpy.PythonActivity').mActivity
+SERVICE = autoclass('org.renpy.android.PythonActivity').mActivity
 
 Intent = autoclass('android.content.Intent')
 
