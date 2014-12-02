@@ -7,7 +7,7 @@ from kivy.properties import DictProperty, StringProperty, \
     NumericProperty, ListProperty, BooleanProperty, ObjectProperty,\
     ConfigParserProperty
 from kivy.clock import Clock, mainthread
-import kivy.garden.ddd  # noqa
+# import kivy.garden.ddd  # noqa
 from kivy.lib.osc.OSC import OSCMessage
 from kivy.utils import platform
 

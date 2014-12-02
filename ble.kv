@@ -278,27 +278,27 @@ ScrollView:
                 device: root.device
                 height: self.minimum_height
 
-        View:
-            canvas.before:
-                Color:
-                    rgba: 1, 1, 1, 1
-            id: view
-            size_hint_y: None if grid.cols == 1 else 1
-            size_hint_x: None if grid.cols == 2 else 1
-            width: self.height
-            height: self.width
-            scene: 'cube.obj'
-            display_all: True
-            scene_scale: 3.0
-            cam_rotation:
-                (
-                root.device.ry[-1] * 360. / 0xffff,
-                root.device.rx[-1] * 360. / 0xffff,
-                - root.device.rz[-1] * 360. / 0xffff
-                )
-            cam_translation: 0, 0, -8
-            light_sources:
-                {x: ([float(y) * 10 - 5 for y in bin(x)[2:].rjust(3, '0')] + [1.0]) for x in range(8)}
+        # View:
+        #     canvas.before:
+        #         Color:
+        #             rgba: 1, 1, 1, 1
+        #     id: view
+        #     size_hint_y: None if grid.cols == 1 else 1
+        #     size_hint_x: None if grid.cols == 2 else 1
+        #     width: self.height
+        #     height: self.width
+        #     scene: 'cube.obj'
+        #     display_all: True
+        #     scene_scale: 3.0
+        #     cam_rotation:
+        #         (
+        #         root.device.ry[-1] * 360. / 0xffff,
+        #         root.device.rx[-1] * 360. / 0xffff,
+        #         - root.device.rz[-1] * 360. / 0xffff
+        #         )
+        #     cam_translation: 0, 0, -8
+        #     light_sources:
+        #         {x: ([float(y) * 10 - 5 for y in bin(x)[2:].rjust(3, '0')] + [1.0]) for x in range(8)}
 
 <ConfigPanel>:
     cols: 1
