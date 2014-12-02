@@ -48,7 +48,7 @@ def stop_scanning(callback):
 class AndroidScanner(PythonJavaClass):
     __javainterfaces__ = ['android.bluetooth.BluetoothAdapter$LeScanCallback']
 
-    @java_method('Landroid.bluetooth.BluetoothDevice,I,[B')
+    @java_method("(Landroid/bluetooth/BluetoothDevice;I[B)V")
     def onLeScan(device, irssi, scan_record):
         print "onLeScan"
         print device.getName()
