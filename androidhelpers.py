@@ -47,7 +47,7 @@ def stop_scanning(callback):
     ADAPTER.stopLeScan(callback)
 
 
-def update_results(self, dt):
+def update_results(dt):
     for d in devices:
         print d.extra.RSSI
 
