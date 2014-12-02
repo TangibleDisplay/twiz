@@ -16,7 +16,6 @@ from uuid import uuid4 as uuid
 from random import gauss
 import sys
 # import rtmidi2
-import bluetooth._bluetooth as bluez
 from time import time
 from struct import pack, unpack
 from threading import Thread
@@ -47,10 +46,9 @@ MIDI_SIGNALS = {
 }
 
 try:
-    sock = bluez.hci_open_dev()
+    import bluetooth._bluetooth as bluez
 except:
-    print "error accessing bluetooth device..."
-    sys.exit(1)
+    pass
 
 
 def hci_enable_le_scan(sock):
@@ -386,6 +384,12 @@ class BLEApp(App):
             self.scanner = AndroidScanner()
 
         else:
+            try:
+                self.sock = sock = bluez.hci_open_dev()
+            except:
+                print "error accessing bluetooth device..."
+                sys.exit(1)
+
             self.old_filter = sock.getsockopt(
                 bluez.SOL_HCI, bluez.HCI_FILTER, 14)
 
@@ -415,9 +419,9 @@ class BLEApp(App):
         else:
             if value:
                 # hci_le_set_scan_parameters(sock)
-                hci_enable_le_scan(sock)
+                hci_enable_le_scan(self.sock)
             else:
-                hci_disable_le_scan(sock)
+                hci_disable_le_scan(self.sock)
 
     def ensure_sections(self, device):
         section = device.address + '-osc'
@@ -462,7 +466,7 @@ class BLEApp(App):
 
     def parse_events(self, *args):
         while True:
-            pkt = sock.recv(255)
+            pkt = self.sock.recv(255)
 
             ptype, event, plen = unpack("BBB", pkt[:3])
 
