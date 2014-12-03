@@ -19,8 +19,6 @@ print "get ADAPTER"
 
 REQUEST_ENABLE_BT = 0x100
 
-devices = []
-
 
 def activity_result(request_code, result_code, data):
     print("get result: %s, %s, %s" % (
@@ -52,13 +50,9 @@ def restart_scanning(callback):
     start_scanning(callback)
 
 
-def update_results(dt):
-    for d in devices:
-        print d.getName(), d.getUuids(), d.hashCode(), d.getAddress()
-
-
 class AndroidScanner(PythonJavaClass):
     __javainterfaces__ = ['android.bluetooth.BluetoothAdapter$LeScanCallback']
+    callback = None
 
     @java_method("(Landroid/bluetooth/BluetoothDevice;I[B)V")
     def onLeScan(self, device, irssi, scan_record):
@@ -66,4 +60,5 @@ class AndroidScanner(PythonJavaClass):
         print device.getName()
         print irssi
         print len(scan_record), scan_record
-        devices.append(device)
+        if self.callback:
+            self.callback(device.getName(), device.getAddress(), irssi, scan_record)

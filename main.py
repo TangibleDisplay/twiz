@@ -382,6 +382,7 @@ class BLEApp(App):
     def init_ble(self):
         if platform == 'android':
             self.scanner = AndroidScanner()
+            self.scanner.callback = self.android_parse_event
 
         else:
             try:
@@ -402,7 +403,7 @@ class BLEApp(App):
             bluez.hci_filter_set_ptype(self.flt, bluez.HCI_EVENT_PKT)
             sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, self.flt)
 
-            self.parser_thread = Thread(target=self.parse_events)
+            self.parser_thread = Thread(target=self.linux_parse_events)
             self.parser_thread.daemon = True
             self.parser_thread.start()
 
@@ -475,7 +476,21 @@ class BLEApp(App):
             self.scan_results[pd.address] = pd
             results.add_widget(pd)
 
-    def parse_events(self, *args):
+    def decode_data(self, pkt, offset, dlen):
+        return unpack(
+            '>' + 'h' * ((dlen - 3) // 2),
+            pkt[offset + 4:offset + dlen + 1])
+
+    def android_parse_event(self, name, address, irssi, data):
+        data = {
+            'name': name,
+            'address': address,
+            'power': irssi,
+            'sensor_data': self.decode_data(data)
+            }
+        self.update_device(data)
+
+    def linux_parse_events(self, *args):
         while True:
             pkt = self.sock.recv(255)
 
@@ -514,9 +529,7 @@ class BLEApp(App):
                                 dlen, dtype = unpack(
                                     'BB', pkt[offset:offset + 2])
                                 if dtype == 0xff:
-                                    sensor_data = unpack(
-                                        '>' + 'h' * ((dlen - 3) // 2),
-                                        pkt[offset + 4:offset + dlen + 1])
+                                    sensor_data = self.decode_data(pkt, offset, dlen)
                                     if len(sensor_data) == 6:
                                         data['sensor'] = sensor_data
                                     break
