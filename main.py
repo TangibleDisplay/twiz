@@ -22,7 +22,7 @@ from threading import Thread
 import gc
 
 if platform == 'android':
-    from androidhelpers import AndroidScanner, start_scanning, stop_scanning, restart_scanning
+    from androidhelpers import AndroidScanner, start_scanning, stop_scanning
 
 __version__ = '1.0'
 
@@ -409,14 +409,22 @@ class BLEApp(App):
     def simulate_ploogin(self, dt):
         self.root.ids.scan.add_widget(PloogSimulator())
 
+    def restart_scanning(self, dt):
+        self.scanning_active = not self.scanning_active
+        if self.scanning_active:
+            stop_scanning(self.scanner)
+        else:
+            start_scanning(self.scanner)
+
     def set_scanning(self, value):
         if platform == 'android':
             if value:
                 start_scanning(self.scanner)
-                self.restart_scanning = lambda *x: restart_scanning(self.scanner)
-                Clock.schedule_interval(self.restart_scanning, 1)
+                self.scanning_active = True
+                Clock.schedule_interval(self.restart_scanning, .5)
             else:
                 stop_scanning(self.scanner)
+                self.scanning_active = False
                 Clock.unschedule(self.restart_scanning)
 
         else:
