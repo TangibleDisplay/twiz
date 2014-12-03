@@ -420,12 +420,12 @@ class BLEApp(App):
         if platform == 'android':
             if value:
                 start_scanning(self.scanner)
-                self.scanning_active = True
-                Clock.schedule_interval(self.restart_scanning, .5)
+                # self.scanning_active = True
+                # Clock.schedule_interval(self.restart_scanning, .5)
             else:
                 stop_scanning(self.scanner)
-                self.scanning_active = False
-                Clock.unschedule(self.restart_scanning)
+                # self.scanning_active = False
+                # Clock.unschedule(self.restart_scanning)
 
         else:
             if value:
