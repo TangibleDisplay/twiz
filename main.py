@@ -476,18 +476,30 @@ class BLEApp(App):
             self.scan_results[pd.address] = pd
             results.add_widget(pd)
 
-    def decode_data(self, pkt, offset, dlen):
-        return unpack(
-            '>' + 'h' * ((dlen - 3) // 2),
-            pkt[offset + 4:offset + dlen + 1])
+    def decode_data(self, pkt):
+        sensor_data = None
+        offset = 0
+        while offset < len(pkt):
+            dlen, dtype = unpack(
+                'BB', pkt[offset:offset + 2])
+            if dtype == 0xff:
+                sensor_data = unpack(
+                    '>' + 'h' * ((dlen - 3) // 2),
+                    pkt[offset + 4:offset + dlen + 1])
+                break
+            offset += dlen + 1
+        return sensor_data
 
     def android_parse_event(self, name, address, irssi, data):
         data = {
             'name': name,
             'address': address,
             'power': irssi,
-            'sensor_data': self.decode_data(data)
             }
+        sensor = self.decode_data(data)
+        if sensor:
+            data['sensor'] = sensor
+
         self.update_device(data)
 
     def linux_parse_events(self, *args):
@@ -529,7 +541,9 @@ class BLEApp(App):
                                 dlen, dtype = unpack(
                                     'BB', pkt[offset:offset + 2])
                                 if dtype == 0xff:
-                                    sensor_data = self.decode_data(pkt, offset, dlen)
+                                    sensor_data = unpack(
+                                        '>' + 'h' * ((dlen - 3) // 2),
+                                        pkt[offset + 4:offset + dlen + 1])
                                     if len(sensor_data) == 6:
                                         data['sensor'] = sensor_data
                                     break
