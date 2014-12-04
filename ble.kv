@@ -70,7 +70,7 @@ ScrollView:
             size_hint_y: None
             height: scrollview.height
             orientation: 'vertical'
-            ScrollView:
+            BoxLayout:
                 scroll_timeout: 20
                 id: scrollview
                 pos: root.pos
@@ -139,7 +139,7 @@ ScrollView:
             size_hint_y: None
             height: self.texture_size[1] + 10
 
-        ScrollView:
+        BoxLayout:
             scroll_timeout: 20
             id: scrollview
             pos: root.pos
