@@ -265,7 +265,7 @@ ScrollView:
     GraphZone:
         device: root.device
     GridLayout:
-        cols: 1 if self.width < max(osconfig.minimum_width) + config.height else 2
+        cols: 1 if self.width < osconfig.minimum_width + config.height else 2
         id: grid
         size_hint_y: None
         height: max(self.minimum_height, 1)
