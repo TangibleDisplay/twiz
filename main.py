@@ -423,7 +423,7 @@ class BLEApp(App):
             if value:
                 start_scanning(self.scanner)
                 self.scanning_active = True
-                Clock.schedule_interval(self.restart_scanning, .1)
+                Clock.schedule_interval(self.restart_scanning, .05)
             else:
                 stop_scanning(self.scanner)
                 self.scanning_active = False
