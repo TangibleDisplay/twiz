@@ -44,6 +44,12 @@ ScrollView:
         DevicesPanel:
             id: visu
 
+        Label:
+            text: app.error_log
+            text_size: self.width, None
+            size_hint_y: None
+            height: self.texture_size[1]
+
 <ScanPanel>:
     height: max(logo.height, box.height)
     orientation: 'vertical'

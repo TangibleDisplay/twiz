@@ -340,6 +340,7 @@ class Graph(Widget):
 class BLEApp(App):
     scan_results = DictProperty({})
     visus = DictProperty({})
+    error_log = StringProperty('')
     sensor_list = ListProperty(
         ['rx', 'ry', 'rz', 'ax', 'ay', 'az'])
     auto_activate = ConfigParserProperty(
@@ -501,7 +502,13 @@ class BLEApp(App):
             'address': address,
             'power': irssi,
             }
-        sensor = self.decode_data(data)
+        try:
+            sensor = self.decode_data(data)
+        except:
+           self.error_log += 'error decoding data from %s:%s\n' % (
+               name,
+               unpack('<' + 'B' * len(data), pack('<' + 'b' * len(data), data)))
+
         if sensor:
             device_data['sensor'] = sensor
 
