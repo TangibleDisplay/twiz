@@ -9,21 +9,31 @@ Intent = autoclass('android.content.Intent')
 
 BluetoothManager = SERVICE.getSystemService(Context.BLUETOOTH_SERVICE)
 
+BTAdapter = autoclass('android.bluetooth.BluetoothAdapter')
+
 ADAPTER = BluetoothManager.getAdapter()
 
 REQUEST_ENABLE_BT = 0x100
 
+INTENT_LOCK = False
+
+from android import activity
 
 def activity_result(request_code, result_code, data):
     print("get result: %s, %s, %s" % (
         request_code == REQUEST_ENABLE_BT, result_code, data))
+    INTENT_LOCK = False
 
 
 def start_scanning(callback):
-    if not ADAPTER.isEnabled():
+    global INTENT_LOCK
+    if not ADAPTER.isEnabled() and not INTENT_LOCK:
+        print "binding activity result"
+        activity.bind(on_activity_result=activity_result)
+        INTENT_LOCK = True
+        print "starting activity for result"
         SERVICE.startActivityForResult(
-            Intent(ADAPTER.ACTION_REQUEST_ENABLE), REQUEST_ENABLE_BT)
-        SERVICE.bind(on_activity_result=activity_result)
+            Intent(BTAdapter.ACTION_REQUEST_ENABLE), REQUEST_ENABLE_BT)
     else:
         ADAPTER.startLeScan(callback)
 
