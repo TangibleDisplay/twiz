@@ -22,6 +22,7 @@ from android import activity
 def activity_result(request_code, result_code, data):
     print("get result: %s, %s, %s" % (
         request_code == REQUEST_ENABLE_BT, result_code, data))
+    global INTENT_LOCK
     INTENT_LOCK = False
 
 
