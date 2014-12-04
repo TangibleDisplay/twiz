@@ -477,8 +477,13 @@ class BLEApp(App):
             results.add_widget(pd)
 
     def decode_data(self, pkt):
+        pkt = pack('<' + 'b' * len(pkt), *pkt.tolist())
+        local_name_len, = unpack("B", pkt[0])
+        name = pkt[1 + 1:1 + local_name_len]
+
+        dtype = 0
+        offset = 1 + local_name_len
         sensor_data = None
-        offset = 0
         while offset < len(pkt):
             dlen, dtype = unpack(
                 'BB', pkt[offset:offset + 2])
@@ -491,16 +496,16 @@ class BLEApp(App):
         return sensor_data
 
     def android_parse_event(self, name, address, irssi, data):
-        data = {
+        device_data = {
             'name': name,
             'address': address,
             'power': irssi,
             }
         sensor = self.decode_data(data)
         if sensor:
-            data['sensor'] = sensor
+            device_data['sensor'] = sensor
 
-        self.update_device(data)
+        self.update_device(device_data)
 
     def linux_parse_events(self, *args):
         while True:
