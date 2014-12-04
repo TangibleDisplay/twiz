@@ -1,6 +1,11 @@
 from kivy.uix.widget import Widget
 from kivy.resources import resource_find
-from objloader import AssimpObjLoader as ObjFileLoader
+try:
+    from assimpobjloader import AssimpObjLoader as ObjFileLoader
+except:
+    print "pyassimp not available, using python objloader"
+    from objloader import ObjFileLoader
+
 from kivy.uix.image import Image
 from kivy.graphics.fbo import Fbo
 from kivy.graphics import (
@@ -97,7 +102,7 @@ class ObjectRenderer(Widget):
 
     def on_scene(self, instance, value):
         print "loading scene %s" % value
-        self._scene = ObjFileLoader(resource_find(value))
+        self._scene = ObjFileLoader(value)
         self.setup_canvas()
 
     def on_obj_id(self, *args):
