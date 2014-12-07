@@ -195,7 +195,7 @@ class OscConfig(ConfigPanel):
         return self.device.check_osc_values(*args)
 
 
-class PloogDevice(FloatLayout):
+class TwizDevice(FloatLayout):
     active = BooleanProperty(False)
     name = StringProperty('')
     address = StringProperty('')
@@ -309,9 +309,9 @@ class PloogDevice(FloatLayout):
             app.add_visu(self)
 
 
-class PloogSimulator(PloogDevice):
+class TwizSimulator(TwizDevice):
     def __init__(self, **kwargs):
-        super(PloogSimulator, self).__init__(**kwargs)
+        super(TwizSimulator, self).__init__(**kwargs)
         Clock.schedule_interval(self.simulate_values, .1)
 
     def simulate_values(self, dt):
@@ -355,7 +355,7 @@ class BLEApp(App):
         # self.midi_out = rtmidi2.MidiOut().open_virtual_port(':0')
         Clock.schedule_interval(self.clean_results, 1)
         if '--simulate' in sys.argv:
-            Clock.schedule_once(self.simulate_ploogin, 0)
+            Clock.schedule_once(self.simulate_twiz, 0)
         return super(BLEApp, self).build()
 
     def on_pause(self, *args):
@@ -408,8 +408,8 @@ class BLEApp(App):
             self.parser_thread.daemon = True
             self.parser_thread.start()
 
-    def simulate_ploogin(self, dt):
-        self.root.ids.scan.add_widget(PloogSimulator())
+    def simulate_twiz(self, dt):
+        self.root.ids.scan.add_widget(TwizSimulator())
 
     def restart_scanning(self, dt):
         self.scanning_active = not self.scanning_active
@@ -467,7 +467,7 @@ class BLEApp(App):
     @mainthread
     def update_device(self, data):
         pd = self.scan_results.get(data['address'],
-                                   PloogDevice(active=app.auto_activate))
+                                   TwizDevice(active=app.auto_activate))
         pd.update_data(data)
         results = self.root.ids.scan.ids.results
         if app.auto_display:

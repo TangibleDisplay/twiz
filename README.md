@@ -1,9 +1,9 @@
-## PloogControl
+## Twiz
 
 ### About
 
 An user friendly interface to control any osc or midi enabled interface
-with your PloogIn device.
+with your Twiz.
 
 ### Installation
 
