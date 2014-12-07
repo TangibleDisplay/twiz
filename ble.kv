@@ -8,11 +8,11 @@
 #:set small_line '32dp'
 #:import chain itertools.chain
 
-#:set ploog_address_width '150sp'
-#:set ploog_id_width '100sp'
-#:set ploog_power_width '60sp'
-#:set ploog_activate_width '50sp'
-#:set ploog_visu_width '50sp'
+#:set twiz_address_width '150sp'
+#:set twiz_id_width '100sp'
+#:set twiz_power_width '60sp'
+#:set twiz_activate_width '50sp'
+#:set twiz_visu_width '50sp'
 
 #:set config_ip_width '100sp'
 #:set config_port_width '50sp'
@@ -86,23 +86,23 @@ ScrollView:
                             Label:
                                 text: 'address'
                                 size_hint_x: None
-                                width: ploog_address_width
+                                width: twiz_address_width
                             Label:
                                 text: 'id'
                                 size_hint_x: None
-                                width: ploog_id_width
+                                width: twiz_id_width
                             Label:
                                 text: 'power'
                                 size_hint_x: None
-                                width: ploog_power_width
+                                width: twiz_power_width
                             Label:
                                 text: 'activate'
                                 size_hint_x: None
-                                width: ploog_activate_width
+                                width: twiz_activate_width
                             Label:
                                 text: 'visu'
                                 size_hint_x: None
-                                width: ploog_visu_width
+                                width: twiz_visu_width
 
                     GridLayout:
                         id: results
@@ -466,7 +466,7 @@ ScrollView:
         on_press: root.config.remove_line(root)
         width: config_delete_width
 
-<PloogDevice>:
+<TwizDevice>:
     size_hint_y: None
     height: line
 
@@ -475,27 +475,27 @@ ScrollView:
         Label:
             text: root.address
             size_hint_x: None
-            width: ploog_address_width
+            width: twiz_address_width
         Label:
             text: root.name
             size_hint_x: None
-            width: ploog_id_width
+            width: twiz_id_width
         Label:
             text: '%sdb' % root.power
             size_hint_x: None
-            width: ploog_power_width
+            width: twiz_power_width
 
         CheckBox:
             active: root.active
             on_active: root.active = self.active
             size_hint_x: None
-            width: ploog_activate_width
+            width: twiz_activate_width
 
         CheckBox:
             active: root.display
             on_active: root.display = self.active
             size_hint_x: None
-            width: ploog_visu_width
+            width: twiz_visu_width
 
 <TextInput>:
     multiline: False
