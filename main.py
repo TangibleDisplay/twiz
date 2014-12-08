@@ -411,6 +411,9 @@ class BLEApp(App):
     def simulate_twiz(self, dt):
         self.root.ids.scan.add_widget(TwizSimulator())
 
+    def filter_scan_result(self, result):
+        return 'twi' in result
+
     def restart_scanning(self, dt):
         self.scanning_active = not self.scanning_active
         if self.scanning_active:
@@ -497,6 +500,9 @@ class BLEApp(App):
         return sensor_data
 
     def android_parse_event(self, name, address, irssi, data):
+        if not self.filter_scan_result(name):
+            return
+
         device_data = {
             'name': name,
             'address': address,
@@ -545,6 +551,8 @@ class BLEApp(App):
                             name = pkt[
                                 report_pkt_offset + 11 + 1:
                                 report_pkt_offset + 11 + local_name_len]
+                            if not self.filter_scan_result(name):
+                                continue
                             data['name'] = name
 
                             dtype = 0
