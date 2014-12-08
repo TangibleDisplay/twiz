@@ -511,9 +511,10 @@ class BLEApp(App):
         try:
             sensor = self.decode_data(data)
         except:
-           self.error_log += 'error decoding data from %s:%s\n' % (
-               name,
-               unpack('<' + 'B' * len(data), pack('<' + 'b' * len(data), data)))
+            self.error_log += 'error decoding data from %s:%s\n' % (
+                name,
+                unpack('<' + 'B' * len(data),
+                       pack('<' + 'b' * len(data), data)))
 
         if sensor:
             device_data['sensor'] = sensor
