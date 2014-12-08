@@ -26,29 +26,43 @@
 #:set config_event_id_width '80sp'
 #:set config_event_value_width '80sp'
 
-ScrollView:
-    scroll_timeout: 20
-    canvas.before:
-        Color:
-            rgba: bgcolor
-        Rectangle:
-            pos: self.pos
-            size: self.size
-    GridLayout:
+BoxLayout:
+    orientation: 'vertical'
+    BoxLayout:
         size_hint_y: None
-        height: self.minimum_height
-        cols: 1
-        ScanPanel:
-            id: scan
+        height: small_line
+        Button:
+            text: 'auto refresh'
 
-        DevicesPanel:
-            id: visu
+        TextInput:
+            hint_text: 'device name filter'
+            text: app.device_filter
+            on_text: app.device_filter = self.text
+            multiline: False
 
-        Label:
-            text: app.error_log
-            text_size: self.width, None
+    ScrollView:
+        scroll_timeout: 20
+        canvas.before:
+            Color:
+                rgba: bgcolor
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        GridLayout:
             size_hint_y: None
-            height: self.texture_size[1]
+            height: self.minimum_height
+            cols: 1
+            ScanPanel:
+                id: scan
+
+            DevicesPanel:
+                id: visu
+
+            Label:
+                text: app.error_log
+                text_size: self.width, None
+                size_hint_y: None
+                height: self.texture_size[1]
 
 <ScanPanel>:
     height: max(logo.height, box.height)

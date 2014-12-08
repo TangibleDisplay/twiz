@@ -353,6 +353,8 @@ class BLEApp(App):
         0, 'general', 'auto_activate', 'app', val_type=int)
     auto_display = ConfigParserProperty(
         0, 'general', 'auto_display', 'app', val_type=int)
+    device_filter = ConfigParserProperty(
+        '', 'general', 'device_filter', 'app', val_type=str)
 
     def build(self):
         self.init_ble()
@@ -419,7 +421,7 @@ class BLEApp(App):
         self.root.ids.scan.add_widget(TwizSimulator())
 
     def filter_scan_result(self, result):
-        return 'twi' in result.lower()
+        return self.device_filter.strip() in result.lower()
 
     def restart_scanning(self, dt):
         self.scanning_active = not self.scanning_active
