@@ -15,7 +15,11 @@ from socket import socket, AF_INET, SOCK_DGRAM
 from uuid import uuid4 as uuid
 from random import gauss
 import sys
-# import rtmidi2
+try:
+    import rtmidi2
+except:
+    rtmidi2 = None
+
 from time import time
 from struct import pack, unpack
 from threading import Thread
@@ -236,7 +240,7 @@ class TwizDevice(FloatLayout):
             return
 
         self.send_osc_updates()
-        # self.send_midi_updates()
+        self.send_midi_updates()
 
     def check_osc_values(self, ip, port, address, content):
         try:
@@ -287,7 +291,9 @@ class TwizDevice(FloatLayout):
             sendto(data.getBinary(), (ip, int(port)))
 
     def send_midi_updates(self):
-        # port = app.midi_out
+        if not rtmidi2:
+            return
+        port = app.midi_out
         items = app.config.items(self.address + '-midi')
         for k, v in items:
             active, signal, chan, ev_id, ev_value = v.split(',')
@@ -352,7 +358,8 @@ class BLEApp(App):
         self.init_ble()
         self.set_scanning(True)
         self.osc_socket = socket(AF_INET, SOCK_DGRAM)
-        # self.midi_out = rtmidi2.MidiOut().open_virtual_port(':0')
+        if rtmidi2:
+            self.midi_out = rtmidi2.MidiOut().open_virtual_port(':0')
         Clock.schedule_interval(self.clean_results, 1)
         if '--simulate' in sys.argv:
             Clock.schedule_once(self.simulate_twiz, 0)
