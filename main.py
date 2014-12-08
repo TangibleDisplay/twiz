@@ -425,7 +425,7 @@ class BLEApp(App):
         self.root.ids.scan.add_widget(TwizSimulator())
 
     def filter_scan_result(self, result):
-        return self.device_filter.strip() in result.lower()
+        return self.device_filter.strip().lower() in result.lower()
 
     def restart_scanning(self, dt):
         self.scanning_active = not self.scanning_active
