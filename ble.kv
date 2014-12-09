@@ -84,8 +84,7 @@ BoxLayout:
             size_hint_y: None
             height: scrollview.height
             orientation: 'vertical'
-            BoxLayout:
-                scroll_timeout: 20
+            StencilBox:
                 id: scrollview
                 pos: root.pos
                 size_hint_y: None
@@ -153,8 +152,7 @@ BoxLayout:
             size_hint_y: None
             height: self.texture_size[1] + 10
 
-        BoxLayout:
-            scroll_timeout: 20
+        StencilBox:
             id: scrollview
             pos: root.pos
             size_hint_y: None
@@ -509,3 +507,14 @@ BoxLayout:
             on_active: root.display = self.active
             size_hint_x: None
             width: twiz_visu_width
+
+<StencilBox@BoxLayout>:
+    canvas.before:
+        StencilPush
+        Rectangle:
+            size: self.size
+            pos: self.pos
+        StencilUse
+    canvas.after:
+        StencilUnUse
+        StencilPop
