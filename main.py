@@ -235,6 +235,10 @@ class TwizDevice(FloatLayout):
 
         self.send_updates()
 
+    def on_active(self, *args):
+        if self.active:
+            app.ensure_sections(self)
+
     def send_updates(self):
         if not self.active:
             return
