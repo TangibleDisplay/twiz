@@ -1,4 +1,72 @@
 import os
+from os.path import dirname, join
+
+
+class MeshData(object):
+    def __init__(self, **kwargs):
+        self.name = kwargs.get("name")
+        self.vertex_format = [
+            ('v_pos', 3, 'float'),
+            ('v_normal', 3, 'float'),
+            ('v_tc0', 2, 'float'),
+            ('v_ambient', 3, 'float'),
+            ('v_diffuse', 3, 'float'),
+            ('v_specular', 3, 'float'),
+            ('v_specular_coeff', 1, 'float'),
+            ('v_transparency', 1, 'float'),
+            ]
+        self.vertices = []
+        self.indices = []
+        # Default basic material of mesh object
+        self.diffuse_color = (1.0, 1.0, 1.0)
+        self.ambient_color = (1.0, 1.0, 1.0)
+        self.specular_color = (1.0, 1.0, 1.0)
+        self.specular_coefficent = 16.0
+        self.transparency = 1.0
+        self.texture = None
+
+    def set_materials(self, mtl_dict):
+        self.diffuse_color = mtl_dict.get('Kd', self.diffuse_color)
+        self.diffuse_color = [float(v) for v in self.diffuse_color]
+        self.ambient_color = mtl_dict.get('Ka', self.ambient_color)
+        self.ambient_color = [float(v) for v in self.ambient_color]
+        self.specular_color = mtl_dict.get('Ks', self.specular_color)
+        self.specular_color = [float(v) for v in self.specular_color]
+        self.specular_coefficent = float(
+            mtl_dict.get('Ns', self.specular_coefficent))
+        transparency = mtl_dict.get('d')
+        if not transparency:
+            transparency = 1.0 - float(mtl_dict.get('Tr', 0))
+        self.transparency = float(transparency)
+        self.texture = mtl_dict.get('map_Kd', self.texture)
+
+    def calculate_normals(self):
+        for i in range(len(self.indices) / (3)):
+            fi = i * 3
+            v1i = self.indices[fi]
+            v2i = self.indices[fi + 1]
+            v3i = self.indices[fi + 2]
+
+            vs = self.vertices
+            p1 = [vs[v1i + c] for c in range(3)]
+            p2 = [vs[v2i + c] for c in range(3)]
+            p3 = [vs[v3i + c] for c in range(3)]
+
+            u, v = [0, 0, 0], [0, 0, 0]
+            for j in range(3):
+                v[j] = p2[j] - p1[j]
+                u[j] = p3[j] - p1[j]
+
+            n = [0, 0, 0]
+            n[0] = u[1] * v[2] - u[2] * v[1]
+            n[1] = u[2] * v[0] - u[0] * v[2]
+            n[2] = u[0] * v[1] - u[1] * v[0]
+
+            # for k in range(3):
+            #     self.vertices[v1i + 3] = n[k]
+            #     self.vertices[v2i + 3] = n[k]
+            #     self.vertices[v3i + 3] = n[k]
+
 
 class ObjFileLoader(object):
     """  """
@@ -78,7 +146,7 @@ class ObjFileLoader(object):
                 self._current_object = values[1]
             elif values[0] == 'mtllib':
                 # load materials file here
-                self.mtl = MTL(values[1])
+                self.mtl = MTL(join(dirname(filename), (values[1])))
             elif values[0] in ('usemtl', 'usemat'):
                 self.obj_material = values[1]
             if values[0] == 'v':
@@ -137,69 +205,3 @@ class MTL(object):
 
     def get(self, key, default=None):
         return self.contents.get(key, default)
-
-
-class MeshData(object):
-    def __init__(self, **kwargs):
-        self.name = kwargs.get("name")
-        self.vertex_format = [
-            ('v_pos', 3, 'float'),
-            ('v_normal', 3, 'float'),
-            ('v_tc0', 2, 'float'),
-            ('v_ambient', 3, 'float'),
-            ('v_diffuse', 3, 'float'),
-            ('v_specular', 3, 'float'),
-            ('v_specular_coeff', 1, 'float'),
-            ('v_transparency', 1, 'float'),
-            ]
-        self.vertices = []
-        self.indices = []
-        # Default basic material of mesh object
-        self.diffuse_color = (1.0, 1.0, 1.0)
-        self.ambient_color = (1.0, 1.0, 1.0)
-        self.specular_color = (1.0, 1.0, 1.0)
-        self.specular_coefficent = 16.0
-        self.transparency = 1.0
-        self.texture = None
-
-    def set_materials(self, mtl_dict):
-        self.diffuse_color = mtl_dict.get('Kd', self.diffuse_color)
-        self.diffuse_color = [float(v) for v in self.diffuse_color]
-        self.ambient_color = mtl_dict.get('Ka', self.ambient_color)
-        self.ambient_color = [float(v) for v in self.ambient_color]
-        self.specular_color = mtl_dict.get('Ks', self.specular_color)
-        self.specular_color = [float(v) for v in self.specular_color]
-        self.specular_coefficent = float(
-            mtl_dict.get('Ns', self.specular_coefficent))
-        transparency = mtl_dict.get('d')
-        if not transparency:
-            transparency = 1.0 - float(mtl_dict.get('Tr', 0))
-        self.transparency = float(transparency)
-        self.texture = mtl_dict.get('map_Kd', self.texture)
-
-    def calculate_normals(self):
-        for i in range(len(self.indices) / (3)):
-            fi = i * 3
-            v1i = self.indices[fi]
-            v2i = self.indices[fi + 1]
-            v3i = self.indices[fi + 2]
-
-            vs = self.vertices
-            p1 = [vs[v1i + c] for c in range(3)]
-            p2 = [vs[v2i + c] for c in range(3)]
-            p3 = [vs[v3i + c] for c in range(3)]
-
-            u, v = [0, 0, 0], [0, 0, 0]
-            for j in range(3):
-                v[j] = p2[j] - p1[j]
-                u[j] = p3[j] - p1[j]
-
-            n = [0, 0, 0]
-            n[0] = u[1] * v[2] - u[2] * v[1]
-            n[1] = u[2] * v[0] - u[0] * v[2]
-            n[2] = u[0] * v[1] - u[1] * v[0]
-
-            # for k in range(3):
-            self.vertices[v1i + 3] = n[k]
-            self.vertices[v2i + 3] = n[k]
-            self.vertices[v3i + 3] = n[k]

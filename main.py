@@ -7,7 +7,7 @@ from kivy.properties import DictProperty, StringProperty, \
     NumericProperty, ListProperty, BooleanProperty, ObjectProperty,\
     ConfigParserProperty
 from kivy.clock import Clock, mainthread
-# import kivy.garden.ddd  # noqa
+import kivy.garden.ddd  # noqa
 from kivy.lib.osc.OSC import OSCMessage
 from kivy.utils import platform
 
@@ -496,7 +496,6 @@ class BLEApp(App):
     def decode_data(self, pkt):
         pkt = pack('<' + 'b' * len(pkt), *pkt.tolist())
         local_name_len, = unpack("B", pkt[0])
-        name = pkt[1 + 1:1 + local_name_len]
 
         dtype = 0
         offset = 1 + local_name_len

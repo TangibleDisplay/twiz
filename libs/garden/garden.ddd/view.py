@@ -43,10 +43,9 @@ class MultitouchCamera(object):
             c = self.get_center()
             d = self.get_dist(c)
 
-            if self.touches_dist:
-                self.cam_rotation[1] += (c[0] - self.touches_center[0]) / 5.
-                self.cam_rotation[0] -= (c[1] - self.touches_center[1]) / 5.
-                self.cam_translation[2] += (d - self.touches_dist) / 10.
+            self.cam_rotation[1] += (c[0] - self.touches_center[0]) / 5.
+            self.cam_rotation[0] -= (c[1] - self.touches_center[1]) / 5.
+            self.cam_translation[2] += min(.5, max(-.5, (d - self.touches_dist) / 10.))
 
             self.touches_center = c
             self.touches_dist = d
@@ -77,10 +76,9 @@ class MultitouchCamera(object):
 class MultitouchCenteredCamera(MultitouchCamera):
     def setup_scene(self):
         super(MultitouchCenteredCamera, self).setup_scene()
-        if self.scene:
-            self.cam_rot_x.origin = (0, 0, 0)
-            self.cam_rot_x.origin = (0, 0, 0)
-            self.cam_rot_x.origin = (0, 0, 0)
+        self.cam_rot_x.origin = (0, 0, 0)
+        self.cam_rot_x.origin = (0, 0, 0)
+        self.cam_rot_x.origin = (0, 0, 0)
 
     def update_cam(self, dt):
         if not self.touches:
@@ -94,8 +92,7 @@ class MultitouchCenteredCamera(MultitouchCamera):
             c = self.get_center()
             d = self.get_dist(c)
 
-            if self.touches_dist:
-                self.scene_scale += (d - self.touches_dist) / 100.
+            self.obj_scale += (d - self.touches_dist) / 100.
             self.touches_center = c
             self.touches_dist = d
         return True
@@ -148,12 +145,12 @@ class CenteredView(MultitouchCenteredCamera, BaseView):
     min_scale = NumericProperty(0)
     max_scale = NumericProperty(100)
 
-    def on_scene_scale(self, *args):
-        self.scene_scale = max(
+    def on_obj_scale(self, *args):
+        self.obj_scale = max(
             self.min_scale, min(
                 self.max_scale,
-                self.scene_scale))
-        super(CenteredView, self).on_scene_scale(*args)
+                self.obj_scale))
+        super(CenteredView, self).on_obj_scale(*args)
 
 
 KV = '''
@@ -170,7 +167,7 @@ FloatLayout:
 
         id: rendering
         scene: 'data/3d/%s' % scene.text
-        scene_scale: scale.value if scale.value > 0 else 1
+        obj_scale: scale.value if scale.value > 0 else 1
         display_all: True
         ambiant: ambiant.value
         diffuse: diffuse.value
@@ -189,7 +186,7 @@ FloatLayout:
             max: 10
             id: scale
             step: .1
-            value: rendering.scene_scale
+            value: rendering.obj_scale
 
         Spinner:
             id: scene
