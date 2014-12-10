@@ -6,6 +6,7 @@
 #:set white (1, 1, 1, 1)
 #:set line '48dp'
 #:set small_line '32dp'
+#:set larger_line '46dp'
 #:import chain itertools.chain
 
 #:set twiz_address_width '150sp'
@@ -26,143 +27,106 @@
 #:set config_event_id_width '80sp'
 #:set config_event_value_width '80sp'
 
-BoxLayout:
-    orientation: 'vertical'
+TabbedPanel:
+    canvas.before:
+        Color:
+            rgba: bgcolor
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    do_default_tab: False
+
+    ScanPanel:
+        id: scan
+
+    DevicesPanel:
+        id: visu
+
+    Logs:
+
+<Logs@TabbedPanelItem>:
+    text: 'logs'
+    Label:
+        text: app.error_log
+        text_size: self.width, None
+        size_hint_y: None
+        height: self.texture_size[1]
+
+<ScanPanel@TabbedPanelItem>:
+    text: 'scan'
     BoxLayout:
-        size_hint_y: None
-        height: small_line
-        Button:
-            text: 'auto refresh'
-
-        TextInput:
-            hint_text: 'device name filter'
-            text: app.device_filter
-            on_text: app.device_filter = self.text
-            multiline: False
-
-    ScrollView:
-        scroll_timeout: 20
-        canvas.before:
-            Color:
-                rgba: bgcolor
-            Rectangle:
-                pos: self.pos
-                size: self.size
-        GridLayout:
-            size_hint_y: None
-            height: self.minimum_height
-            cols: 1
-            ScanPanel:
-                id: scan
-
-            DevicesPanel:
-                id: visu
-
-            Label:
-                text: app.error_log
-                text_size: self.width, None
-                size_hint_y: None
-                height: self.texture_size[1]
-
-<ScanPanel>:
-    height: max(logo.height, box.height)
-    orientation: 'vertical'
-    size_hint_y: None
-    GridLayout:
-        id: box
-        cols: 1
-        size_hint_y: None
-        height: self.minimum_height
-        ToggleButton:
-            text: 'scan'
-            id: unfold
-            state: 'down'
-            size_hint_y: None
-            height: self.texture_size[1] + 10
-
+        orientation: 'vertical'
         BoxLayout:
             size_hint_y: None
-            height: scrollview.height
-            orientation: 'vertical'
-            StencilBox:
-                id: scrollview
-                pos: root.pos
-                size_hint_y: None
-                max_height: '200sp'
-                height: min(self.max_height, grid.height) if unfold.state == 'down' else 0
-                GridLayout:
-                    id: grid
-                    cols: 1
-                    size_hint_y: None
-                    height: self.minimum_height
-                    GridLayout:
-                        cols: 1
-                        size_hint_y: None
-                        height: self.minimum_height
-                        BoxLayout:
-                            size_hint_y: None
-                            height: line
-                            Label:
-                                text: 'address'
-                                size_hint_x: None
-                                width: twiz_address_width
-                            Label:
-                                text: 'id'
-                                size_hint_x: None
-                                width: twiz_id_width
-                            Label:
-                                text: 'power'
-                                size_hint_x: None
-                                width: twiz_power_width
-                            Label:
-                                text: 'send'
-                                size_hint_x: None
-                                width: twiz_activate_width
-                            Label:
-                                text: 'visu'
-                                size_hint_x: None
-                                width: twiz_visu_width
+            height: larger_line
+            Button:
+                text: 'auto refresh'
 
-                    GridLayout:
-                        id: results
-                        size_hint_y: None
-                        height: self.minimum_height
-                        cols: 1
+            TextInput:
+                hint_text: 'device name filter'
+                text: app.device_filter
+                on_text: app.device_filter = self.text
+                multiline: False
 
-            Image:
-                id: logo
-                # source: 'data/Logo vertical.png'
-                size_hint: None, None
-                size: self.texture_size
-                top: self.size and root.top - 10
-                right: self.size and root.right - 10
-
-<DevicesPanel>:
-    height: box.height
-    size_hint_y: None
-    GridLayout:
-        id: box
-        cols: 1
-        size_hint_y: None
-        height: self.minimum_height
-        ToggleButton:
-            text: 'visu'
-            id: unfold
-            state: 'down'
+        GridLayout:
+            id: grid
+            cols: 1
             size_hint_y: None
-            height: self.texture_size[1] + 10
-
-        StencilBox:
-            id: scrollview
-            pos: root.pos
-            size_hint_y: None
-            height: content.height if unfold.state == 'down' else 0
-
+            height: self.minimum_height
             GridLayout:
                 cols: 1
-                id: content
                 size_hint_y: None
                 height: self.minimum_height
+                BoxLayout:
+                    size_hint_y: None
+                    height: line
+                    Label:
+                        text: 'address'
+                        size_hint_x: None
+                        width: twiz_address_width
+                    Label:
+                        text: 'id'
+                        size_hint_x: None
+                        width: twiz_id_width
+                    Label:
+                        text: 'power'
+                        size_hint_x: None
+                        width: twiz_power_width
+                    Label:
+                        text: 'send'
+                        size_hint_x: None
+                        width: twiz_activate_width
+                    Label:
+                        text: 'visu'
+                        size_hint_x: None
+                        width: twiz_visu_width
+
+            ScrollView:
+                size_hint_y: None
+                height: results.height
+                GridLayout:
+                    id: results
+                    size_hint_y: None
+                    height: self.minimum_height
+                    cols: 1
+
+        Image:
+            id: logo
+            source: 'data/Logo vertical.png'
+            size_hint: None, None
+            size: self.texture_size
+
+        Widget:
+
+<DevicesPanel@TabbedPanelItem>:
+    text: 'visu'
+    ScrollView:
+        GridLayout:
+            cols: 1
+            id: content
+            size_hint_y: None
+            height: self.minimum_height
 
 <GraphZone>:
     avgsize: 100

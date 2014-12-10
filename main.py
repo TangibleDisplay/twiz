@@ -85,14 +85,6 @@ class GraphZone(GridLayout):
     focus = StringProperty('accelero')
 
 
-class DevicesPanel(BoxLayout):
-    pass
-
-
-class ScanPanel(BoxLayout):
-    pass
-
-
 class MidiSensorLine(BoxLayout):
     sensor = StringProperty('')
     device = ObjectProperty(None, rebind=True)
