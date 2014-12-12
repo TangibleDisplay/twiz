@@ -6,145 +6,126 @@
 #:set white (1, 1, 1, 1)
 #:set line '48dp'
 #:set small_line '32dp'
+#:set larger_line '46dp'
 #:import chain itertools.chain
 
-#:set twiz_address_width '150sp'
-#:set twiz_id_width '100sp'
-#:set twiz_power_width '60sp'
-#:set twiz_activate_width '50sp'
-#:set twiz_visu_width '50sp'
+#:set twiz_address_width .30
+#:set twiz_id_width .15
+#:set twiz_power_width .15
+#:set twiz_activate_width .15
+#:set twiz_visu_width .15
 
-#:set config_ip_width '100sp'
-#:set config_port_width '50sp'
-#:set config_address_width '100sp'
-#:set config_content_width '100sp'
-#:set config_delete_width '50sp'
-#:set config_sensor_width '50sp'
-#:set config_active_width '50sp'
-#:set config_event_type_width '120sp'
-#:set config_midi_channel_width '60sp'
-#:set config_event_id_width '80sp'
-#:set config_event_value_width '80sp'
+#:set config_ip_width .2
+#:set config_port_width .1
+#:set config_address_width .2
+#:set config_content_width .2
+#:set config_delete_width .1
+#:set config_sensor_width .1
+#:set config_active_width .1
 
-ScrollView:
-    scroll_timeout: 20
+#:set config_event_type_width .3
+#:set config_midi_channel_width .15
+#:set config_event_id_width .15
+#:set config_event_value_width .15
+
+TabbedPanel:
     canvas.before:
         Color:
             rgba: bgcolor
         Rectangle:
             pos: self.pos
             size: self.size
-    GridLayout:
+
+    do_default_tab: False
+
+    ScanPanel:
+        id: scan
+
+    DevicesPanel:
+        id: visu
+
+    Logs:
+
+    About:
+
+
+<About@TabbedPanelItem>:
+    text: 'About'
+    Image:
+        id: logo
+        source: 'data/Logo vertical.png'
+
+
+<Logs@TabbedPanelItem>:
+    text: 'logs'
+    Label:
+        text: app.error_log
+        text_size: self.width, None
         size_hint_y: None
-        height: self.minimum_height
-        cols: 1
-        ScanPanel:
-            id: scan
+        height: self.texture_size[1]
 
-        DevicesPanel:
-            id: visu
-
-<ScanPanel>:
-    height: max(logo.height, box.height)
-    orientation: 'vertical'
-    size_hint_y: None
-    GridLayout:
-        id: box
-        cols: 1
-        size_hint_y: None
-        height: self.minimum_height
-        ToggleButton:
-            text: 'scan'
-            id: unfold
-            state: 'down'
-            size_hint_y: None
-            height: self.texture_size[1] + 10
-
+<ScanPanel@TabbedPanelItem>:
+    text: 'scan'
+    BoxLayout:
+        orientation: 'vertical'
         BoxLayout:
             size_hint_y: None
-            height: scrollview.height
-            orientation: 'vertical'
-            ScrollView:
-                scroll_timeout: 20
-                id: scrollview
-                pos: root.pos
-                size_hint_y: None
-                max_height: '200sp'
-                height: min(self.max_height, grid.height) if unfold.state == 'down' else 0
-                GridLayout:
-                    id: grid
-                    cols: 1
-                    size_hint_y: None
-                    height: self.minimum_height
-                    GridLayout:
-                        cols: 1
-                        size_hint_y: None
-                        height: self.minimum_height
-                        BoxLayout:
-                            size_hint_y: None
-                            height: line
-                            Label:
-                                text: 'address'
-                                size_hint_x: None
-                                width: twiz_address_width
-                            Label:
-                                text: 'id'
-                                size_hint_x: None
-                                width: twiz_id_width
-                            Label:
-                                text: 'power'
-                                size_hint_x: None
-                                width: twiz_power_width
-                            Label:
-                                text: 'activate'
-                                size_hint_x: None
-                                width: twiz_activate_width
-                            Label:
-                                text: 'visu'
-                                size_hint_x: None
-                                width: twiz_visu_width
+            height: small_line
+            Button:
+                text: 'auto refresh'
 
-                    GridLayout:
-                        id: results
-                        size_hint_y: None
-                        height: self.minimum_height
-                        cols: 1
+            ConfigTextInput:
+                hint_text: 'device name filter'
+                text: app.device_filter
+                on_text: app.device_filter = self.text
 
-            Image:
-                id: logo
-                # source: 'data/Logo vertical.png'
-                size_hint: None, None
-                size: self.texture_size
-                top: self.size and root.top - 10
-                right: self.size and root.right - 10
-
-<DevicesPanel>:
-    height: box.height
-    size_hint_y: None
-    GridLayout:
-        id: box
-        cols: 1
-        size_hint_y: None
-        height: self.minimum_height
-        ToggleButton:
-            text: 'visu'
-            id: unfold
-            state: 'down'
+        GridLayout:
+            id: grid
+            cols: 1
             size_hint_y: None
-            height: self.texture_size[1] + 10
-
-        ScrollView:
-            scroll_timeout: 20
-            id: scrollview
-            pos: root.pos
-            size_hint_y: None
-            height: content.height if unfold.state == 'down' else 0
-
+            height: self.minimum_height
             GridLayout:
                 cols: 1
-                id: content
                 size_hint_y: None
                 height: self.minimum_height
+                BoxLayout:
+                    size_hint_y: None
+                    height: line
+                    Label:
+                        text: 'address'
+                        size_hint_x: twiz_address_width
+                    Label:
+                        text: 'id'
+                        size_hint_x: twiz_id_width
+                    Label:
+                        text: 'power'
+                        size_hint_x: twiz_power_width
+                    Label:
+                        text: 'send'
+                        size_hint_x: twiz_activate_width
+                    Label:
+                        text: 'visu'
+                        size_hint_x: twiz_visu_width
+
+            ScrollView:
+                size_hint_y: None
+                height: results.height
+                GridLayout:
+                    id: results
+                    size_hint_y: None
+                    height: self.minimum_height
+                    cols: 1
+
+        Widget:
+
+<DevicesPanel@TabbedPanelItem>:
+    text: 'visu'
+    ScrollView:
+        GridLayout:
+            cols: 1
+            id: content
+            size_hint_y: None
+            height: self.minimum_height
 
 <GraphZone>:
     avgsize: 100
@@ -160,7 +141,12 @@ ScrollView:
             size_hint: None, None
             size: self.minimum_size
             cols: 4
-            Widget:
+            Label:
+                text: root.device.address if root.device else ''
+                text_size: self.width, None
+                shorten: True
+                split_str: ':'
+                shorten_from: 'right'
             Label:
                 color: color_x
                 text: 'x'
@@ -181,7 +167,7 @@ ScrollView:
 
             ToggleButton:
                 text: 'euler'
-                group: 'grid'
+                group: 'grid-%s' % (root.device.address if root.device else '')
                 size_hint: None, None
                 size: self.texture_size
                 size: '48sp', '48sp'
@@ -196,7 +182,7 @@ ScrollView:
 
             ToggleButton:
                 text: 'accel'
-                group: 'grid'
+                group: 'grid-%s' % (root.device.address if root.device else '')
                 size_hint: None, None
                 size: self.texture_size
                 size: '48sp', '48sp'
@@ -221,8 +207,6 @@ ScrollView:
     data_len: min(max(map(len, (self.line_x, self.line_y, self.line_z))), 100)
     max_value: 0x7fff
     min_value: -0x8000
-    size_hint_x: None
-    width: '500sp'
     canvas:
         Color:
             rgba: color_x
@@ -259,7 +243,7 @@ ScrollView:
     GraphZone:
         device: root.device
     GridLayout:
-        cols: 1 if self.width < max(osconfig.minimum_width, midiconfig.minimum_width) + config.height else 2
+        cols: 1 if app.root.width < app.root.height else 2
         id: grid
         size_hint_y: None
         height: max(self.minimum_height, 1)
@@ -267,14 +251,10 @@ ScrollView:
             id: config
             cols: 1
             size_hint_y: None
-            orientation: 'vertical'
+            size_hint_x: 1.6 if grid.cols == 2 else 1
             height: self.minimum_height
             OscConfig:
                 id: osconfig
-                device: root.device
-                height: self.minimum_height
-            MidiConfig:
-                id: midiconfig
                 device: root.device
                 height: self.minimum_height
 
@@ -282,14 +262,11 @@ ScrollView:
             canvas.before:
                 Color:
                     rgba: 1, 1, 1, 1
-            id: view
-            size_hint_y: None if grid.cols == 1 else 1
-            size_hint_x: None if grid.cols == 2 else 1
-            width: self.height
-            height: self.width
             scene: 'cube.obj'
             display_all: True
-            scene_scale: 3.0
+            obj_scale: 3.0
+            size_hint_y: None
+            height: self.width
             cam_rotation:
                 (
                 root.device.ry[-1] * 360. / 0xffff,
@@ -298,7 +275,10 @@ ScrollView:
                 )
             cam_translation: 0, 0, -8
             light_sources:
-                {x: ([float(y) * 10 - 5 for y in bin(x)[2:].rjust(3, '0')] + [1.0]) for x in range(8)}
+                {
+                x: ([float(y) * 10 - 5 for y in bin(x)[2:].rjust(3, '0')] + [1.0])
+                for x in range(8)
+                }
 
 <ConfigPanel>:
     cols: 1
@@ -309,34 +289,26 @@ ScrollView:
     GridLayout:
         rows: 1
         size_hint_y: None
-        size_hint_x: None
-        width: self.minimum_width
         height: line
         Label:
             text: 'sensor'
-            size_hint_x: None
-            width: config_sensor_width
+            size_hint_x: config_sensor_width
         Label:
             text: 'active'
-            size_hint_x: None
-            width: config_active_width
+            size_hint_x: config_active_width
         Label:
             text: 'event type'
-            size_hint_x: None
-            width: config_event_type_width
+            size_hint_x: config_event_type_width
         Label:
             text: 'channel'
             text_size: self.size
-            size_hint_x: None
-            width: config_midi_channel_width
+            size_hint_x: config_midi_channel_width
         Label:
             text: 'event id'
-            size_hint_x: None
-            width: config_event_id_width
+            size_hint_x: config_event_id_width
         Label:
             text: 'event value'
-            size_hint_x: None
-            width: config_event_value_width
+            size_hint_x: config_event_value_width
 
     GridLayout:
         cols: 1
@@ -373,14 +345,14 @@ ScrollView:
         width: config_midi_channel_width
         hint_text: '0-127'
 
-    TextInput:
+    ConfigTextInput:
         text: root.event_id
         on_text_validate: root.event_id = self.text
         size_hint_x: None
         width: config_event_id_width
         hint_text: '0-127 or v'
 
-    TextInput:
+    ConfigTextInput:
         text: root.event_value
         on_text_validate: root.event_value = self.text
         size_hint_x: None
@@ -391,29 +363,22 @@ ScrollView:
     GridLayout:
         rows: 1
         size_hint_y: None
-        size_hint_x: None
-        width: self.minimum_width
         height: '48sp'
         Label:
             text: 'ip'
-            size_hint_x: None
-            width: config_ip_width
+            size_hint_x: config_ip_width
         Label:
             text: 'port'
-            size_hint_x: None
-            width: config_port_width
+            size_hint_x: config_port_width
         Label:
             text: 'address'
-            size_hint_x: None
-            width: config_address_width
+            size_hint_x: config_address_width
         Label:
             text: 'content'
-            size_hint_x: None
-            width: config_content_width
+            size_hint_x: config_content_width
         Label:
             text: 'delete'
-            size_hint_x: None
-            width: config_delete_width
+            size_hint_x: config_delete_width
 
     GridLayout:
         cols: 1
@@ -433,38 +398,33 @@ ScrollView:
 <OscConfigLine>:
     size_hint_y: None
     height: small_line
-    TextInput:
+    ConfigTextInput:
         text: root.ip
         on_text: root.ip = self.text
-        size_hint_x: None
-        width: config_ip_width
+        size_hint_x: config_ip_width
 
-    TextInput:
+    ConfigTextInput:
         text: root.port
         on_text: root.port = self.text
+        size_hint_x: config_port_width
         background_color: white if self.text .isdigit() else red # don't remove the space!
-        size_hint_x: None
-        width: config_port_width
 
-    TextInput:
+    ConfigTextInput:
         text: root.address
         on_text: root.address = self.text
+        size_hint_x: config_address_width
         background_color: white if self.text .startswith('/') else red # don't remove the space!
-        size_hint_x: None
-        width: config_address_width
 
-    TextInput:
+    ConfigTextInput:
         text: root.content
         on_text: root.content = self.text
+        size_hint_x: config_content_width
         background_color: white if all(x in app.sensor_list for x in self.text .split(',')) else red # don't remove the space!
-        size_hint_x: None
-        width: config_content_width
-
 
     Button:
         text: 'x'
         on_press: root.config.remove_line(root)
-        width: config_delete_width
+        size_hint_x: config_delete_width
 
 <TwizDevice>:
     size_hint_y: None
@@ -474,28 +434,24 @@ ScrollView:
         pos_hint: {'center': (.5, .5)}
         Label:
             text: root.address
-            size_hint_x: None
-            width: twiz_address_width
+            size_hint_x: twiz_address_width
         Label:
             text: root.name
-            size_hint_x: None
-            width: twiz_id_width
+            size_hint_x: twiz_id_width
         Label:
             text: '%sdb' % root.power
-            size_hint_x: None
-            width: twiz_power_width
-
+            size_hint_x: twiz_power_width
         CheckBox:
-            active: root.active
             on_active: root.active = self.active
-            size_hint_x: None
-            width: twiz_activate_width
-
+            size_hint_x: twiz_activate_width
         CheckBox:
             active: root.display
             on_active: root.display = self.active
-            size_hint_x: None
-            width: twiz_visu_width
+            size_hint_x: twiz_visu_width
 
-<TextInput>:
+<ScrollView>:
+    scroll_timeout: 150
+    scroll_distance: 10
+
+<ConfigTextInput@TextInput>:
     multiline: False

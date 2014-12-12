@@ -9,17 +9,26 @@ from kivy.properties import DictProperty, StringProperty, \
 from kivy.clock import Clock, mainthread
 import kivy.garden.ddd  # noqa
 from kivy.lib.osc.OSC import OSCMessage
+from kivy.utils import platform
 
 from socket import socket, AF_INET, SOCK_DGRAM
 from uuid import uuid4 as uuid
 from random import gauss
 import sys
-import rtmidi2
-import bluetooth._bluetooth as bluez
+try:
+    import rtmidi2
+except:
+    rtmidi2 = None
+
 from time import time
 from struct import pack, unpack
 from threading import Thread
 import gc
+
+if platform == 'android':
+    from androidhelpers import AndroidScanner, start_scanning, stop_scanning
+
+__version__ = '1.0'
 
 from bt_consts import (
     OGF_LE_CTL,
@@ -41,10 +50,9 @@ MIDI_SIGNALS = {
 }
 
 try:
-    sock = bluez.hci_open_dev()
+    import bluetooth._bluetooth as bluez
 except:
-    print "error accessing bluetooth device..."
-    sys.exit(1)
+    pass
 
 
 def hci_enable_le_scan(sock):
@@ -75,14 +83,6 @@ class ObjectView(GridLayout):
 class GraphZone(GridLayout):
     device = ObjectProperty(None, rebind=True)
     focus = StringProperty('accelero')
-
-
-class DevicesPanel(BoxLayout):
-    pass
-
-
-class ScanPanel(BoxLayout):
-    pass
 
 
 class MidiSensorLine(BoxLayout):
@@ -227,6 +227,10 @@ class TwizDevice(FloatLayout):
 
         self.send_updates()
 
+    def on_active(self, *args):
+        if self.active:
+            app.ensure_sections(self)
+
     def send_updates(self):
         if not self.active:
             return
@@ -283,6 +287,8 @@ class TwizDevice(FloatLayout):
             sendto(data.getBinary(), (ip, int(port)))
 
     def send_midi_updates(self):
+        if not rtmidi2:
+            return
         port = app.midi_out
         items = app.config.items(self.address + '-midi')
         for k, v in items:
@@ -336,25 +342,29 @@ class Graph(Widget):
 class BLEApp(App):
     scan_results = DictProperty({})
     visus = DictProperty({})
+    error_log = StringProperty('')
     sensor_list = ListProperty(
         ['rx', 'ry', 'rz', 'ax', 'ay', 'az'])
     auto_activate = ConfigParserProperty(
         0, 'general', 'auto_activate', 'app', val_type=int)
     auto_display = ConfigParserProperty(
         0, 'general', 'auto_display', 'app', val_type=int)
+    device_filter = ConfigParserProperty(
+        '', 'general', 'device_filter', 'app', val_type=str)
 
     def build(self):
         self.init_ble()
-        self.parser_thread = Thread(target=self.parse_events)
-        self.parser_thread.daemon = True
-        self.parser_thread.start()
         self.set_scanning(True)
         self.osc_socket = socket(AF_INET, SOCK_DGRAM)
-        self.midi_out = rtmidi2.MidiOut().open_virtual_port(':0')
+        if rtmidi2:
+            self.midi_out = rtmidi2.MidiOut().open_virtual_port(':0')
         Clock.schedule_interval(self.clean_results, 1)
         if '--simulate' in sys.argv:
             Clock.schedule_once(self.simulate_twiz, 0)
         return super(BLEApp, self).build()
+
+    def on_pause(self, *args):
+        return True
 
     def build_config(self, config):
         config.setdefaults('general', {
@@ -376,26 +386,63 @@ class BLEApp(App):
                 self.remove_visu(v)
 
     def init_ble(self):
-        self.old_filter = sock.getsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, 14)
+        if platform == 'android':
+            self.scanner = AndroidScanner()
+            self.scanner.callback = self.android_parse_event
 
-        # perform a device inquiry on bluetooth device #0
-        # The inquiry should last 8 * 1.28 = 10.24 seconds
-        # before the inquiry is performed, bluez should flush its cache of
-        # previously discovered devices
-        self.flt = bluez.hci_filter_new()
-        bluez.hci_filter_all_events(self.flt)
-        bluez.hci_filter_set_ptype(self.flt, bluez.HCI_EVENT_PKT)
-        sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, self.flt)
+        else:
+            try:
+                self.sock = sock = bluez.hci_open_dev()
+            except:
+                print "error accessing bluetooth device..."
+                sys.exit(1)
+
+            self.old_filter = sock.getsockopt(
+                bluez.SOL_HCI, bluez.HCI_FILTER, 14)
+
+            # perform a device inquiry on bluetooth device #0
+            # The inquiry should last 8 * 1.28 = 10.24 seconds
+            # before the inquiry is performed, bluez should flush its cache of
+            # previously discovered devices
+            self.flt = bluez.hci_filter_new()
+            bluez.hci_filter_all_events(self.flt)
+            bluez.hci_filter_set_ptype(self.flt, bluez.HCI_EVENT_PKT)
+            sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, self.flt)
+
+            self.parser_thread = Thread(target=self.linux_parse_events)
+            self.parser_thread.daemon = True
+            self.parser_thread.start()
 
     def simulate_twiz(self, dt):
         self.root.ids.scan.add_widget(TwizSimulator())
 
-    def set_scanning(self, value):
-        if value:
-            # hci_le_set_scan_parameters(sock)
-            hci_enable_le_scan(sock)
+    def filter_scan_result(self, result):
+        return self.device_filter.strip().lower() in result.lower()
+
+    def restart_scanning(self, dt):
+        self.scanning_active = not self.scanning_active
+        if self.scanning_active:
+            stop_scanning(self.scanner)
         else:
-            hci_disable_le_scan(sock)
+            start_scanning(self.scanner)
+
+    def set_scanning(self, value):
+        if platform == 'android':
+            if value:
+                start_scanning(self.scanner)
+                self.scanning_active = True
+                Clock.schedule_interval(self.restart_scanning, .05)
+            else:
+                stop_scanning(self.scanner)
+                self.scanning_active = False
+                Clock.unschedule(self.restart_scanning)
+
+        else:
+            if value:
+                # hci_le_set_scan_parameters(sock)
+                hci_enable_le_scan(self.sock)
+            else:
+                hci_disable_le_scan(self.sock)
 
     def ensure_sections(self, device):
         section = device.address + '-osc'
@@ -438,9 +485,49 @@ class BLEApp(App):
             self.scan_results[pd.address] = pd
             results.add_widget(pd)
 
-    def parse_events(self, *args):
+    def decode_data(self, pkt):
+        pkt = pack('<' + 'b' * len(pkt), *pkt.tolist())
+        local_name_len, = unpack("B", pkt[0])
+
+        dtype = 0
+        offset = 1 + local_name_len
+        sensor_data = None
+        while offset < len(pkt):
+            dlen, dtype = unpack(
+                'BB', pkt[offset:offset + 2])
+            if dtype == 0xff:
+                sensor_data = unpack(
+                    '>' + 'h' * ((dlen - 3) // 2),
+                    pkt[offset + 4:offset + dlen + 1])
+                break
+            offset += dlen + 1
+        return sensor_data
+
+    def android_parse_event(self, name, address, irssi, data):
+        if not self.filter_scan_result(name):
+            return
+
+        device_data = {
+            'name': name,
+            'address': address,
+            'power': irssi,
+            }
+        try:
+            sensor = self.decode_data(data)
+        except:
+            self.error_log += 'error decoding data from %s:%s\n' % (
+                name,
+                unpack('<' + 'B' * len(data),
+                       pack('<' + 'b' * len(data), data)))
+
+        if sensor:
+            device_data['sensor'] = sensor
+
+        self.update_device(device_data)
+
+    def linux_parse_events(self, *args):
         while True:
-            pkt = sock.recv(255)
+            pkt = self.sock.recv(255)
 
             ptype, event, plen = unpack("BBB", pkt[:3])
 
@@ -469,6 +556,8 @@ class BLEApp(App):
                             name = pkt[
                                 report_pkt_offset + 11 + 1:
                                 report_pkt_offset + 11 + local_name_len]
+                            if not self.filter_scan_result(name):
+                                continue
                             data['name'] = name
 
                             dtype = 0
