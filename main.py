@@ -536,20 +536,14 @@ class BLEApp(App):
         self.update_device(device_data)
 
     def osx_parse_event(self, uuid, rssi, name, values):
+        values = values[2:]
         device_data = {
             'name': name,
             'address': uuid,
             'power': rssi,
+            'sensor': unpack('>' + 'h' * (len(values) / 2), ''.join(values)),
         }
 
-        data = values.strip('<>').replace(' ', '')[4:]
-        ax = int(data[0:4], 16)
-        ay = int(data[4:8], 16)
-        az = int(data[8:12], 16)
-        rx = int(data[12:16], 16)
-        ry = int(data[16:20], 16)
-        rz = int(data[20:24], 16)
-        device_data['sensor'] = [ax, ay, az, rx, ry, rz]
         self.update_device(device_data)
 
     def linux_parse_events(self, *args):

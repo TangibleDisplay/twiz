@@ -1,4 +1,4 @@
-from pyobjus import autoclass, protocol, dereference
+from pyobjus import autoclass, protocol, dereference, CArray
 from pyobjus.dylib_manager import load_framework, INCLUDE
 
 (CBCentralManagerStateUnknown,
@@ -8,6 +8,7 @@ from pyobjus.dylib_manager import load_framework, INCLUDE
  CBCentralManagerStatePoweredOff,
  CBCentralManagerStatePoweredOn) = range(6)
 
+c = CArray()
 
 class Ble(object):
 
@@ -24,12 +25,13 @@ class Ble(object):
         if keys.count() < 2:
             return
         name = data.objectForKey_(keys.objectAtIndex_(0)).cString()
-        values = data.objectForKey_(keys.objectAtIndex_(1)).description().cString()
+        values = data.objectForKey_(keys.objectAtIndex_(1))
+        sensor = c.get_from_ptr(values.bytes().arg_ref, 'c', values.length())
         uuid = peripheral.description().cString()
         if self.callback:
-            self.callback(uuid, rssi, name, values)
+            self.callback(uuid, rssi, name, sensor)
         else:
-            print uuid, name, values, rssi
+            print uuid, name, sensor, rssi
             self.peripherals[uuid] = (peripheral, rssi)
 
     def check_le(self, central):
