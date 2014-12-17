@@ -27,6 +27,8 @@ import gc
 
 if platform == 'android':
     from androidhelpers import AndroidScanner, start_scanning, stop_scanning
+elif platform == 'macosx':
+    from osx_ble import Ble
 
 __version__ = '1.0'
 
@@ -390,6 +392,11 @@ class BLEApp(App):
             self.scanner = AndroidScanner()
             self.scanner.callback = self.android_parse_event
 
+        elif platform == 'macosx':
+            self.scanner = Ble()
+            self.scanner.create()
+            self.scanner.callback = self.osx_parse_event
+
         else:
             try:
                 self.sock = sock = bluez.hci_open_dev()
@@ -436,6 +443,9 @@ class BLEApp(App):
                 stop_scanning(self.scanner)
                 self.scanning_active = False
                 Clock.unschedule(self.restart_scanning)
+
+        elif platform == 'macosx':
+            self.scanner.start_scan()
 
         else:
             if value:
@@ -523,6 +533,23 @@ class BLEApp(App):
         if sensor:
             device_data['sensor'] = sensor
 
+        self.update_device(device_data)
+
+    def osx_parse_event(self, uuid, rssi, name, values):
+        device_data = {
+            'name': name,
+            'address': uuid,
+            'power': rssi,
+        }
+
+        data = values.strip('<>').replace(' ', '')[4:]
+        ax = int(data[0:4], 16)
+        ay = int(data[4:8], 16)
+        az = int(data[8:12], 16)
+        rx = int(data[12:16], 16)
+        ry = int(data[16:20], 16)
+        rz = int(data[20:24], 16)
+        device_data['sensor'] = [ax, ay, az, rx, ry, rz]
         self.update_device(device_data)
 
     def linux_parse_events(self, *args):
