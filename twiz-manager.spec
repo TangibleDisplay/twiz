@@ -16,7 +16,7 @@ install_hooks(globals())
 
 a = Analysis(['main.py'],
              pathex=['.'],
-             hiddenimports=['numpy.core.multiarray'],
+             hiddenimports=['numpy.core.multiarray', 'pyobjus.protocols'],
              excludes=['gobject', 'gio', 'PIL', 'gst', 'gtk', 'gi', 'wx', 'twisted', 'curses'] + (['pygame'] if IS_LINUX else []),
              runtime_hooks=None)
 
@@ -47,3 +47,6 @@ coll = COLLECT(exe,
                strip=None,
                upx=True,
                name='twiz-manager')
+app = BUNDLE(coll,
+             name='twiz-manager.app',
+             icon='data/Logo vertical.icns')
