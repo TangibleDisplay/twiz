@@ -412,11 +412,11 @@ TabbedPanel:
         size_hint_x: config_address_width
         background_color: white if self.text .startswith('/') else red # don't remove the space!
 
-    ConfigTextInput:
+    Button:
         text: root.content
         on_text: root.content = self.text
         size_hint_x: config_content_width
-        background_color: white if all(x in app.sensor_list for x in self.text .split(',')) else red # don't remove the space!
+        on_press: app.open_content_dropdown(self)
 
     Button:
         text: 'x'

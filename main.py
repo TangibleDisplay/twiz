@@ -2,7 +2,12 @@ from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.dropdown import DropDown
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
 from kivy.properties import DictProperty, StringProperty, \
     NumericProperty, ListProperty, BooleanProperty, ObjectProperty,\
     ConfigParserProperty
@@ -378,6 +383,62 @@ class BLEApp(App):
         print "writing config"
         self.config.write()
         print "config written"
+        self.profile.disable()
+        self.profile.dump_stats('/sdcard/twiz.profile')
+
+    def open_content_dropdown(self, text_input):
+        options = {
+            'euler angles (0-0xffff)': 'rx,ry,rz',
+            'euler angles (0-1.0)': 'rx_d,ry_d,rz_d',
+            'accelerations (0-0xffff)': 'ax,ay,az',
+            'accelerations (0-1.0)': 'ax_d,ay_d,az_d',
+            'accelerations + euler (0-0xffff)': 'ax,ay,az,rx,ry,rz',
+            'accelerations + euler (0-1.0)': 'ax_d,ay_d,az_d,rx_d,ry_d,rz_d',
+        }
+        #d = DropDown(width=text_input.width)
+        #for o in options:
+        #    b = Button(text=o, size_hint_y=None)
+        #    b.bind(texture_size=b.setter('size'))
+        #    b.bind(on_press=lambda x: text_input.setter('text')(options[o]))
+        #    d.add_widget(b)
+
+        #d.open(text_input)
+
+        p = Popup(title='message content', size_hint=(.9, .9))
+        def callback(option):
+            text_input.text = options.get(option, option)
+            p.dismiss()
+
+        content = GridLayout(spacing=10, cols=1)
+        for o in options:
+            b = Button(text=o)
+            b.bind(on_press=lambda x: callback(x.text))
+            content.add_widget(b)
+
+        instructions = Label(
+            text='custom content:\n two types of sensors are '
+            'proposed, rotation (euler angles) and acceleration, each '
+            'in 3 axis: rx, ry and rz represent rotation values, ax, '
+            'ay and az represent acceleration values, any value can '
+            'take a "_d" suffix, to be casted to a value between 0 '
+            'and 1 instead of the default (from 0 to 0xffff', size_hint_y=None)
+        instructions.bind(
+            size=instructions.setter('text_size'),
+            texture_size=instructions.setter('size'))
+        content.add_widget(instructions)
+        ti = TextInput(
+            text=text_input.text,
+            multiline=False,
+            input_type='text',
+            keyboard_suggestions=False)
+        content.add_widget(ti)
+        b = Button(text='set custom')
+        b.bind(on_press=lambda x: callback(ti.text))
+        content.add_widget(b)
+
+        p.add_widget(content)
+        p.open()
+
 
     def clean_results(self, dt):
         t = time() - 10  # forget devices after 10 seconds without any update
