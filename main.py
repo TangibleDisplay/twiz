@@ -10,6 +10,8 @@ from kivy.clock import Clock, mainthread
 import kivy.garden.ddd  # noqa
 from kivy.lib.osc.OSC import OSCMessage
 from kivy.utils import platform
+from kivy.core.window import Window
+Window.softinput_mode = 'resize'
 
 from socket import socket, AF_INET, SOCK_DGRAM
 from uuid import uuid4 as uuid
