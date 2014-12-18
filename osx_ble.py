@@ -1,5 +1,8 @@
 from pyobjus import autoclass, protocol, dereference, CArray
 from pyobjus.dylib_manager import load_framework, INCLUDE
+NSString = autoclass('NSString')
+NSNumber = autoclass('NSNumber')
+NSDictionary = autoclass('NSDictionary')
 
 (CBCentralManagerStateUnknown,
  CBCentralManagerStateResetting,
@@ -58,7 +61,12 @@ class Ble(object):
 
     def start_scan(self):
         print 'Scanning started'
-        self.central.scanForPeripheralsWithServices_options_(None, None)
+        key = NSString.alloc().initWithUTF8String_(
+            'kCBScanOptionAllowDuplicates')
+        value = NSNumber.numberWithInt_(1)
+        options = NSDictionary.alloc().initWithObjectsAndKeys_(
+            value, key, None) 
+        self.central.scanForPeripheralsWithServices_options_(None, options)
 
 
 if __name__ == '__main__':
