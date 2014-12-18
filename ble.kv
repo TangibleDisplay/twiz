@@ -179,6 +179,7 @@ TabbedPanel:
             ToggleButton:
                 text: 'accel'
                 group: 'grid-%s' % (root.device.name if root.device else '')
+                allow_no_selection: False
                 size_hint: None, None
                 size: self.texture_size
                 size: '48sp', '48sp'
