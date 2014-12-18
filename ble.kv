@@ -92,9 +92,6 @@ TabbedPanel:
                     size_hint_y: None
                     height: line
                     Label:
-                        text: 'address'
-                        size_hint_x: twiz_address_width
-                    Label:
                         text: 'id'
                         size_hint_x: twiz_id_width
                     Label:
@@ -142,11 +139,9 @@ TabbedPanel:
             size: self.minimum_size
             cols: 4
             Label:
-                text: root.device.address if root.device else ''
+                text: root.device.name if root.device else ''
                 text_size: self.width, None
-                shorten: True
-                split_str: ':'
-                shorten_from: 'right'
+                font_size: 12
             Label:
                 color: color_x
                 text: 'x'
@@ -167,7 +162,7 @@ TabbedPanel:
 
             ToggleButton:
                 text: 'euler'
-                group: 'grid-%s' % (root.device.address if root.device else '')
+                group: 'grid-%s' % (root.device.name if root.device else '')
                 size_hint: None, None
                 size: self.texture_size
                 size: '48sp', '48sp'
@@ -182,7 +177,7 @@ TabbedPanel:
 
             ToggleButton:
                 text: 'accel'
-                group: 'grid-%s' % (root.device.address if root.device else '')
+                group: 'grid-%s' % (root.device.name if root.device else '')
                 size_hint: None, None
                 size: self.texture_size
                 size: '48sp', '48sp'
@@ -432,9 +427,6 @@ TabbedPanel:
 
     BoxLayout:
         pos_hint: {'center': (.5, .5)}
-        Label:
-            text: root.address
-            size_hint_x: twiz_address_width
         Label:
             text: root.name
             size_hint_x: twiz_id_width

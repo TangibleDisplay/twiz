@@ -109,7 +109,7 @@ class MidiSensorLine(BoxLayout):
 
     def update(self, *args):
         app.config.set(
-            self.device.address + '-midi',
+            self.device.name + '-midi',
             self.sensor,
             '%s,%s,%s,%s,%s' % (
                 1 if self.active else 0,
@@ -122,7 +122,7 @@ class MidiSensorLine(BoxLayout):
 
     def load_values(self, *args):
         if self.device and self.sensor:
-            section = self.device.address + '-midi'
+            section = self.device.name + '-midi'
             values = app.config.get(section, self.sensor)
             active, signal, chan, event_id, event_value = values.split(',')
             self.active = True if active == '1' else False
@@ -149,7 +149,7 @@ class OscConfigLine(BoxLayout):
 
     def update(self, *args):
         app.config.set(
-            self.config.device.address + '-osc', self.key,
+            self.config.device.name + '-osc', self.key,
             '%s,%s,%s,%s' %
             (self.ip, self.port, self.address, self.content.replace(',', ' ')))
 
@@ -175,7 +175,7 @@ class OscConfig(ConfigPanel):
             self.load_config(self.device)
 
     def load_config(self, device):
-        for k, v in app.config.items(self.device.address + '-osc'):
+        for k, v in app.config.items(self.device.name + '-osc'):
             ip, port, address, content = v.split(',')
             self.add_line(
                 key=k, ip=ip, port=port, address=address,
@@ -187,7 +187,7 @@ class OscConfig(ConfigPanel):
 
     def remove_line(self, line):
         self.ids.content.remove_widget(line)
-        app.config.remove_option(self.device.address + '-osc', line.key)
+        app.config.remove_option(self.device.name + '-osc', line.key)
 
     def check_osc_values(self, *args):
         return self.device.check_osc_values(*args)
@@ -196,7 +196,6 @@ class OscConfig(ConfigPanel):
 class TwizDevice(FloatLayout):
     active = BooleanProperty(False)
     name = StringProperty('')
-    address = StringProperty('')
     power = NumericProperty(0)
     last_update = NumericProperty(0)
     display = BooleanProperty(False)
@@ -212,7 +211,7 @@ class TwizDevice(FloatLayout):
 
     def update_data(self, data):
         for d in data:
-            if d in ('name', 'address', 'power'):
+            if d in ('name', 'power'):
                 setattr(self, d, data[d])
 
             elif d == 'sensor':
@@ -260,7 +259,7 @@ class TwizDevice(FloatLayout):
     def send_osc_updates(self):
         sendto = app.osc_socket.sendto
         # XXX potential performances killer, maybe cache these somewhere
-        for k, v in app.config.items(self.address + '-osc'):
+        for k, v in app.config.items(self.name + '-osc'):
             ip, port, address, content = v.split(',')
             if not self.check_osc_values(ip, port, address, content):
                 continue
@@ -292,7 +291,7 @@ class TwizDevice(FloatLayout):
         if not rtmidi2:
             return
         port = app.midi_out
-        items = app.config.items(self.address + '-midi')
+        items = app.config.items(self.name + '-midi')
         for k, v in items:
             active, signal, chan, ev_id, ev_value = v.split(',')
             if not active == '1':
@@ -322,7 +321,6 @@ class TwizSimulator(TwizDevice):
         self.update_data(
             {
                 'name': 'simulator',
-                'address': '00:00:00:00',
                 'power': int(gauss(80, 5)),
                 'sensor':
                     [
@@ -455,13 +453,13 @@ class BLEApp(App):
                 hci_disable_le_scan(self.sock)
 
     def ensure_sections(self, device):
-        section = device.address + '-osc'
+        section = device.name + '-osc'
         if not self.config.has_section(section):
             app.config.add_section(section)
             app.config.setdefaults(section, {
             })
 
-        section = device.address + '-midi'
+        section = device.name + '-midi'
         if not self.config.has_section(section):
             app.config.add_section(section)
             app.config.setdefaults(section, {
@@ -484,15 +482,15 @@ class BLEApp(App):
 
     @mainthread
     def update_device(self, data):
-        pd = self.scan_results.get(data['address'],
+        pd = self.scan_results.get(data['name'],
                                    TwizDevice(active=app.auto_activate))
         pd.update_data(data)
         results = self.root.ids.scan.ids.results
         if app.auto_display:
             pd.display = True
 
-        if pd.address not in self.scan_results:
-            self.scan_results[pd.address] = pd
+        if pd.name not in self.scan_results:
+            self.scan_results[pd.name] = pd
             results.add_widget(pd)
 
     def decode_data(self, pkt):
@@ -519,7 +517,6 @@ class BLEApp(App):
 
         device_data = {
             'name': name,
-            'address': address,
             'power': irssi,
             }
         try:
@@ -539,7 +536,6 @@ class BLEApp(App):
         values = values[2:]
         device_data = {
             'name': name,
-            'address': uuid,
             'power': rssi,
             'sensor': unpack('>' + 'h' * (len(values) / 2), ''.join(values)),
         }
