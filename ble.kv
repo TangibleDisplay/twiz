@@ -8,6 +8,7 @@
 #:set small_line '32dp'
 #:set larger_line '46dp'
 #:import chain itertools.chain
+#:import sp kivy.metrics.sp
 
 #:set twiz_address_width .30
 #:set twiz_id_width .15
@@ -235,47 +236,49 @@ TabbedPanel:
 
 <ObjectView>:
     size_hint_y: None
-    height: self.minimum_height
-    cols: 1
-    GraphZone:
-        device: root.device
+    height: min(self.minimum_height, sp(300))
+    cols: 2
     GridLayout:
-        cols: 1 if app.root.width < app.root.height else 2
-        id: grid
+        cols: 1
         size_hint_y: None
-        height: max(self.minimum_height, 1)
+        height: self.minimum_size[1]
+        GraphZone:
+            device: root.device
         GridLayout:
-            id: config
-            cols: 1
+            cols: 1 if app.root.width < app.root.height else 2
+            id: grid
             size_hint_y: None
-            size_hint_x: 1.6 if grid.cols == 2 else 1
-            height: self.minimum_height
-            OscConfig:
-                id: osconfig
-                device: root.device
+            height: max(self.minimum_height, 1)
+            GridLayout:
+                id: config
+                cols: 1
+                size_hint_y: None
+                size_hint_x: 1.6 if grid.cols == 2 else 1
                 height: self.minimum_height
+                OscConfig:
+                    id: osconfig
+                    device: root.device
+                    height: self.minimum_height
 
-        View:
-            canvas.before:
-                Color:
-                    rgba: 1, 1, 1, 1
-            scene: 'cube.obj'
-            display_all: True
-            obj_scale: 3.0
-            size_hint_y: None
-            height: self.width
-            cam_rotation:
-                (
-                root.device.ry[-1] * 360. / 0xffff,
-                root.device.rx[-1] * 360. / 0xffff,
-                root.device.rz[-1] * 360. / 0xffff
-                )
-            cam_translation: 0, 0, -8
-            light_sources:
-                {
-                x: ([float(y) * 10 - 5 for y in bin(x)[2:].rjust(3, '0')] + [1.0])
-                for x in range(8)
-                }
+    View:
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+        scene: 'cube.obj'
+        display_all: True
+        obj_scale: 3.0
+        cam_rotation:
+            (
+            root.device.ry[-1] * 360. / 0xffff,
+            root.device.rx[-1] * 360. / 0xffff,
+            root.device.rz[-1] * 360. / 0xffff
+            )
+        cam_translation: 0, 0, -8
+        light_sources:
+            {
+            x: ([float(y) * 10 - 5 for y in bin(x)[2:].rjust(3, '0')] + [1.0])
+            for x in range(8)
+            }
 
 <ConfigPanel>:
     cols: 1
