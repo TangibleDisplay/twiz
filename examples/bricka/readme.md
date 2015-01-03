@@ -29,3 +29,7 @@ rx_d,ry_d
 ```
 
 for example.
+
+### Note
+
+Brica doesn't exit cleanly on escape, you need to use ctrl-c in the shell that started it (or xkill if you started it graphically)
