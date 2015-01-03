@@ -128,7 +128,7 @@ class ObjFileLoader(object):
 
         self.obj_material = None
 
-        print("filename %s" % filename)
+        print "filename %s" % filename
         for line in open(filename, "r"):
             if delimiter == "# object" and "# object" in line:
                 if self._current_object:

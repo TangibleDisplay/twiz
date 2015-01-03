@@ -3,8 +3,9 @@ from kivy.resources import resource_find
 try:
     from assimpobjloader import AssimpObjLoader as ObjFileLoader
 except Exception as e:
-    print("Error trying to import assimp: %s, using simple objloader" % e)
-    from .objloader import ObjFileLoader
+    print("Error trying to import assimp: %s, using simple objloader" %
+          e.message)
+    from objloader import ObjFileLoader
 
 from kivy.uix.image import Image
 from kivy.graphics.fbo import Fbo
@@ -94,7 +95,7 @@ class ObjectRenderer(Widget):
         if not (self.scene and self.obj_id or self.display_all):
             return
 
-        print('setting up the scene')
+        print 'setting up the scene'
         with self.fbo:
             self.fbo['ambiant'] = self.ambiant
             self.fbo['diffuse'] = self.diffuse
@@ -106,7 +107,7 @@ class ObjectRenderer(Widget):
             self.cb = Callback(self.reset_gl_context)
 
     def on_scene(self, instance, value):
-        print("loading scene %s" % value)
+        print "loading scene %s" % value
         self._scene = ObjFileLoader(resource_find(value))
         self.setup_canvas()
 
@@ -163,10 +164,10 @@ class ObjectRenderer(Widget):
         self.obj_translate = Translate(xyz=self.obj_translation)
 
         if len(m.indices) > 2 ** 16:
-            print('%s too big! %s indices' % (obj_id, len(m.indices)))
+            print '%s too big! %s indices' % (obj_id, len(m.indices))
 
         if m.texture:
-            print("loading texture %s " % m.texture)
+            print "loading texture %s " % m.texture
             img = Image(source=resource_find(
                 join(dirname(self.scene), m.texture)))
             texture = img.texture
