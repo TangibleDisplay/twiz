@@ -134,7 +134,7 @@ class ObjectRenderer(Widget):
         glDisable(GL_DEPTH_TEST)
 
     def update_glsl(self, *args):
-        asp = self.width / float(self.height)
+        asp = self.width / max(float(self.height), 1)
         proj = Matrix().view_clip(-asp, asp, -1, 1, 1, 100, 1)
         self.fbo['projection_mat'] = proj
 
