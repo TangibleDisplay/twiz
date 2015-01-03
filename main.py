@@ -4,7 +4,6 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
-from kivy.uix.dropdown import DropDown
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
@@ -12,6 +11,7 @@ from kivy.properties import DictProperty, StringProperty, \
     NumericProperty, ListProperty, BooleanProperty, ObjectProperty,\
     ConfigParserProperty
 from kivy.clock import Clock, mainthread
+from kivy.animation import Animation
 import kivy.garden.ddd  # noqa
 from kivy.lib.osc.OSC import OSCMessage
 from kivy.utils import platform
@@ -20,7 +20,7 @@ Window.softinput_mode = 'resize'
 
 from socket import socket, AF_INET, SOCK_DGRAM
 from uuid import uuid4 as uuid
-from random import gauss
+from random import random, randint, gauss
 import sys
 try:
     import rtmidi2
@@ -320,20 +320,26 @@ class TwizDevice(FloatLayout):
 
 
 class TwizSimulator(TwizDevice):
+    values = ListProperty([0, 0, 0, 0, 0, 0])
+
     def __init__(self, **kwargs):
         super(TwizSimulator, self).__init__(**kwargs)
-        Clock.schedule_interval(self.simulate_values, .1)
+        self.simulate_values()
 
-    def simulate_values(self, dt):
+    def simulate_values(self, *args):
+        a = Animation(
+            values=[randint(0, 0xffff) for x in app.sensor_list],
+            d=random() * 3,
+            t='in_out_sine')
+        a.bind(on_complete=self.simulate_values)
+        a.start(self)
+
+    def on_values(self, *args):
         self.update_data(
             {
                 'name': 'simulator',
                 'power': int(gauss(80, 5)),
-                'sensor':
-                    [
-                        gauss(getattr(self, attr)[-1], 1) % 0xffff
-                        for attr in app.sensor_list
-                    ]
+                'sensor': self.values
             }
         )
 
