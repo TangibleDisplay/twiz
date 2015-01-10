@@ -364,6 +364,8 @@ class BLEApp(App):
         0, 'general', 'auto_display', 'app', val_type=int)
     device_filter = ConfigParserProperty(
         '', 'general', 'device_filter', 'app', val_type=str)
+    nexus4_fix = ConfigParserProperty(
+        0, 'android', 'nexus4_fix', val_type=int)
 
     def build(self):
         self.init_ble()
@@ -383,6 +385,9 @@ class BLEApp(App):
         config.setdefaults('general', {
             'auto_activate': 0,
             'auto_display': 0
+            })
+        config.setdefaults('android', {
+            'nexus4_fix': 0,
             })
 
     def on_stop(self, *args):
@@ -504,11 +509,11 @@ class BLEApp(App):
         if platform == 'android':
             if value:
                 start_scanning(self.scanner)
-                self.scanning_active = True
-                Clock.schedule_interval(self.restart_scanning, .05)
+                if app.nexus4_fix:
+                    self.scanning_active = True
+                    Clock.schedule_interval(self.restart_scanning, .05)
             else:
                 stop_scanning(self.scanner)
-                self.scanning_active = False
                 Clock.unschedule(self.restart_scanning)
 
         elif platform == 'macosx':
