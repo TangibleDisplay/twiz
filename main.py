@@ -365,7 +365,7 @@ class BLEApp(App):
     device_filter = ConfigParserProperty(
         '', 'general', 'device_filter', 'app', val_type=str)
     nexus4_fix = ConfigParserProperty(
-        0, 'android', 'nexus4_fix', val_type=int)
+        0, 'android', 'nexus4_fix', 'app', val_type=int)
 
     def build(self):
         self.init_ble()
