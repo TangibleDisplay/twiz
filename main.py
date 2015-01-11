@@ -64,6 +64,12 @@ except:
     pass
 
 
+def configbool(value):
+    if isinstance(value, basestring):
+        return value.lower() not in ('false', 'no', '')
+    return bool(value)
+
+
 def hci_enable_le_scan(sock):
     hci_toggle_le_scan(sock, 0x01)
 
@@ -365,7 +371,7 @@ class BLEApp(App):
     device_filter = ConfigParserProperty(
         '', 'general', 'device_filter', 'app', val_type=str)
     nexus4_fix = ConfigParserProperty(
-        0, 'android', 'nexus4_fix', 'app', val_type=int)
+        False, 'android', 'nexus4_fix', 'app', val_type=configbool)
 
     def build(self):
         self.init_ble()
@@ -389,6 +395,12 @@ class BLEApp(App):
         config.setdefaults('android', {
             'nexus4_fix': 0,
             })
+    def build_settings(self, settings):
+        settings.add_json_panel(
+            'Twiz-manager',
+            self.config,
+            'twiz_manager.json'
+            )
 
     def on_stop(self, *args):
         print "writing config"
