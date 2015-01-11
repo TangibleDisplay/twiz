@@ -586,7 +586,7 @@ class BLEApp(App):
         return sensor_data
 
     def android_parse_event(self, name, address, irssi, data):
-        if not self.filter_scan_result(name):
+        if not name or not self.filter_scan_result(name):
             return
 
         device_data = {
