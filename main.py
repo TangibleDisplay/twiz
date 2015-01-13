@@ -568,7 +568,7 @@ class BLEApp(App):
 
     @mainthread
     def update_device(self, data):
-        pd = self.scan_results.get(data['name'],
+        pd = self.scan_results.get(data.get('name', ''),
                                    TwizDevice(active=app.auto_activate))
         pd.update_data(data)
         results = self.root.ids.scan.ids.results
