@@ -1,6 +1,11 @@
+bin/
+*.profile
+*.buildozer
 *.pyo
 *.pyc
 *.swo
 *.swp
+*.swn
+*.swm
 *.un~
 *.ini
