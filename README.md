@@ -2,8 +2,18 @@
 
 ### About
 
-A user friendly interface to control any osc or midi enabled interface
-with your Twiz.
+A user friendly interface to control any osc or midi enabled interface with
+your Twiz.
+
+
+The Twiz are wireless motion sensors sending data using Bluetooth Low energy.
+
+Their IMU (Inertial Measurement Unit) has 9 degrees of freedom and their sensor
+fusion (3D accelerometer + 3D gyroscope + 3D magnetometer) is made on board.
+
+The fusion result is sent as Euler angles, telling how it is tilted compared
+to the gravity vector and how it is oriented compared to the north pole.
+
 
 ### Installation
 
