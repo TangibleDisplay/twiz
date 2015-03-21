@@ -63,7 +63,7 @@ it.
     cmake -G 'Unix Makefiles'
     make
     sudo cp **/libassimp.so /usr/local/lib
-    cd ports/PyAssimp
+    cd port/PyAssimp
     python setup.py install --user
 
 ### Usage
