@@ -12,7 +12,7 @@ from kivy.properties import DictProperty, StringProperty, \
     ConfigParserProperty
 from kivy.clock import Clock, mainthread
 from kivy.animation import Animation
-import kivy.garden.ddd  # noqa
+import ddd  # noqa
 from kivy.lib.osc.OSC import OSCMessage
 from kivy.utils import platform
 from kivy.core.window import Window
