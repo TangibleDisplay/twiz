@@ -267,12 +267,7 @@ TabbedPanel:
         scene: 'cube.obj'
         display_all: True
         obj_scale: 3.0
-        cam_rotation:
-            (
-            root.device.ry[-1] * 360. / 0xffff,
-            root.device.rx[-1] * 360. / 0xffff,
-            root.device.rz[-1] * 360. / 0xffff
-            )
+        cam_rotation: app.convert_angle(root.device.rx[-1], root.device.ry[-1], root.device.rz[-1])
         cam_translation: 0, 0, -8
         light_sources:
             {

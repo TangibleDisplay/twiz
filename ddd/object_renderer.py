@@ -30,7 +30,7 @@ class ObjectRenderer(Widget):
     obj_texture = StringProperty('')
     texture = ObjectProperty(None, allownone=True)
     cam_translation = ListProperty([0, 0, 0])
-    cam_rotation = ListProperty([0, 0, 0])
+    cam_rotation = ListProperty([0, 0, 0, 0])
     display_all = BooleanProperty(False)
     light_sources = DictProperty()
     ambiant = NumericProperty(.5)
@@ -58,9 +58,11 @@ class ObjectRenderer(Widget):
         self.obj_rot_z.angle = self.obj_rotation[2]
 
     def on_cam_rotation(self, *args):
-        self.cam_rot_x.angle = self.cam_rotation[0]
-        self.cam_rot_y.angle = self.cam_rotation[1]
-        self.cam_rot_z.angle = self.cam_rotation[2]
+        self.cam_rot.angle = self.cam_rotation[0]
+        self.cam_rot.x = self.cam_rotation[1]
+        self.cam_rot.y = self.cam_rotation[2]
+        self.cam_rot.z = self.cam_rotation[3]
+
 
     def on_obj_translation(self, *args):
         self.obj_translate.xyz = self.cam_translation
@@ -144,9 +146,7 @@ class ObjectRenderer(Widget):
         PushMatrix()
         self.cam_translate = Translate(self.cam_translation)
         # Rotate(0, 1, 0, 0)
-        self.cam_rot_x = Rotate(self.cam_rotation[0], 1, 0, 0)
-        self.cam_rot_y = Rotate(self.cam_rotation[1], 0, 1, 0)
-        self.cam_rot_z = Rotate(self.cam_rotation[2], 0, 0, 1)
+        self.cam_rot = Rotate(*self.cam_rotation)
         self.scale = Scale(self.obj_scale)
         UpdateNormalMatrix()
         if self.display_all:
