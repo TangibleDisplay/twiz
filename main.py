@@ -454,19 +454,26 @@ class BLEApp(App):
         '''
         # angles must be converted to radians then divided by 2, so only
         # one times pi
-        c1 = cos(pi * rx / 0xffff)
-        s1 = sin(pi * rx / 0xffff)
+        cyaw = cos(pi * rx / 0xffff)
+        syaw = sin(pi * rx / 0xffff)
 
-        c2 = cos(pi * ry / 0xffff)
-        s2 = cos(pi * ry / 0xffff)
+        cpitch = cos(pi * ry / 0xffff)
+        spitch = cos(pi * ry / 0xffff)
 
-        c3 = cos(pi * rz / 0xffff)
-        s3 = cos(pi * rz / 0xffff)
+        croll = cos(pi * rz / 0xffff)
+        sroll = cos(pi * rz / 0xffff)
 
-        w = c1 * c2 * c3 - s1 * s2 * s3
-        x = c1 * c2 * s3 + s1 * s2 * c3
-        y = s1 * c2 * c3 + c1 * s2 * s3
-        z = c1 * s2 * c3 - s1 * c2 * s3
+        # method from euclidianspace
+        # w = cyaw * cpitch * croll - syaw * spitch * sroll
+        # x = cyaw * cpitch * sroll + syaw * spitch * croll
+        # y = syaw * cpitch * croll + cyaw * spitch * sroll
+        # z = cyaw * spitch * croll - syaw * cpitch * sroll
+
+        # method from gpwiki
+        x = sroll * cpitch * cyaw - croll * spitch * syaw
+        y = croll * spitch * sroll + sroll * cpitch * syaw
+        z = croll * cpitch * syaw - sroll * spitch * cyaw
+        w = croll * cpitch * cyaw + sroll * spitch * syaw
 
         return 180 * w / pi, x, y, z
 
