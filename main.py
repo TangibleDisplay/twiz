@@ -468,7 +468,7 @@ class BLEApp(App):
         y = s1 * c2 * c3 + c1 * s2 * s3
         z = c1 * s2 * c3 - s1 * c2 * s3
 
-        return w, x, y, z
+        return 180 * w / pi, x, y, z
 
     def clean_results(self, dt):
         t = time() - 10  # forget devices after 10 seconds without any update
