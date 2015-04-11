@@ -59,10 +59,7 @@ class ObjectRenderer(Widget):
 
     def on_cam_rotation(self, *args):
         self.cam_rot.angle = self.cam_rotation[0]
-        self.cam_rot.x = self.cam_rotation[1]
-        self.cam_rot.y = self.cam_rotation[2]
-        self.cam_rot.z = self.cam_rotation[3]
-
+        self.cam_rot.axis = tuple(self.cam_rotation[1:])
 
     def on_obj_translation(self, *args):
         self.obj_translate.xyz = self.cam_translation
