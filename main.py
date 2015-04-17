@@ -18,7 +18,7 @@ from kivy.utils import platform
 from kivy.core.window import Window
 Window.softinput_mode = 'resize'
 
-from math import cos, sin, pi
+from math import cos, sin, pi, atan2, asin
 from socket import socket, AF_INET, SOCK_DGRAM
 from uuid import uuid4 as uuid
 from random import random, randint, gauss
@@ -32,7 +32,6 @@ from time import time
 from struct import pack, unpack
 from threading import Thread
 import gc
-import q
 
 if platform == 'android':
     from androidhelpers import AndroidScanner, start_scanning, stop_scanning
@@ -252,6 +251,18 @@ class TwizDevice(FloatLayout):
         self.last_update = time()
 
         self.send_updates()
+
+    def convert_angles(self, *q):
+        yaw = atan2(2.0 * (q[1] * q[2] + q[0] * q[3]),
+                    q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3])
+        pitch = -asin(2.0 * (q[1] * q[3] - q[0] * q[2]))
+        roll = atan2(2.0 * (q[0] * q[1] + q[2] * q[3]),
+                     q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3])
+        pitch *= 180.0 / pi
+        yaw *= 180.0 / pi
+        yaw -= 4.11
+        roll *= 180.0 / pi
+        return yaw, pitch, roll
 
     def on_active(self, *args):
         if self.active:
@@ -654,7 +665,6 @@ class BLEApp(App):
                     # print "advertising report"
                     num_reports = unpack("B", pkt[0])[0]
                     report_pkt_offset = 0
-                    # q/"+"
                     for i in range(0, num_reports):
                         data = {}
                         report_event_type = unpack(
