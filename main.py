@@ -32,6 +32,7 @@ from time import time
 from struct import pack, unpack
 from threading import Thread
 import gc
+import q
 
 if platform == 'android':
     from androidhelpers import AndroidScanner, start_scanning, stop_scanning
@@ -243,7 +244,6 @@ class TwizDevice(FloatLayout):
                 # self.ry.append(d[4])
                 # self.rz.append(d[3])
 
-                q(d[0:4])
                 self.qx.append(d[0])
                 self.qy.append(d[1])
                 self.qz.append(d[2])
@@ -683,6 +683,7 @@ class BLEApp(App):
                     # print "advertising report"
                     num_reports = unpack("B", pkt[0])[0]
                     report_pkt_offset = 0
+                    # q/"+"
                     for i in range(0, num_reports):
                         data = {}
                         report_event_type = unpack(
