@@ -37,6 +37,7 @@ class ObjectRenderer(Widget):
     diffuse = NumericProperty(.5)
     specular = NumericProperty(.5)
     mode = StringProperty('triangles')
+    cam_mode = StringProperty('quaternions')
 
     def __init__(self, **kwargs):
         self.canvas = Canvas()
@@ -58,8 +59,13 @@ class ObjectRenderer(Widget):
         self.obj_rot_z.angle = self.obj_rotation[2]
 
     def on_cam_rotation(self, *args):
-        self.cam_rot.angle = self.cam_rotation[0]
-        self.cam_rot.axis = tuple(self.cam_rotation[1:])
+        if self.cam_mode == 'quaternions':
+            self.cam_rot.angle = self.cam_rotation[0]
+            self.cam_rot.axis = tuple(self.cam_rotation[1:])
+        elif self.cam_mode == 'euler':
+            self.cam_rot_x.angle = self.cam_rotation[0]
+            self.cam_rot_y.angle = self.cam_rotation[1]
+            self.cam_rot_z.angle = self.cam_rotation[2]
 
     def on_obj_translation(self, *args):
         self.obj_translate.xyz = self.cam_translation
@@ -142,7 +148,13 @@ class ObjectRenderer(Widget):
 
         PushMatrix()
         self.cam_translate = Translate(self.cam_translation)
-        self.cam_rot = Rotate(*self.cam_rotation)
+        if self.cam_mode == 'quaternions':
+            self.cam_rot = Rotate(*self.cam_rotation)
+        elif self.cam_mode == 'euler':
+            self.cam_rot_x = Rotate(self.cam_rotation[0], 1, 0, 0)
+            self.cam_rot_y = Rotate(self.cam_rotation[1], 0, 1, 0)
+            self.cam_rot_z = Rotate(self.cam_rotation[2], 0, 0, 1)
+
         self.scale = Scale(self.obj_scale)
         UpdateNormalMatrix()
         if self.display_all:
