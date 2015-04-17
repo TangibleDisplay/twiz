@@ -474,35 +474,6 @@ class BLEApp(App):
         p.add_widget(content)
         p.open()
 
-    def convert_angle(self, rx, ry, rz):
-        '''
-        creates a quaternion from 3 euler angles
-        '''
-        # angles must be converted to radians then divided by 2, so only
-        # one times pi
-        cyaw = cos(pi * rx / 0xffff)
-        syaw = sin(pi * rx / 0xffff)
-
-        cpitch = cos(pi * ry / 0xffff)
-        spitch = cos(pi * ry / 0xffff)
-
-        croll = cos(pi * rz / 0xffff)
-        sroll = cos(pi * rz / 0xffff)
-
-        # method from euclidianspace
-        # w = cyaw * cpitch * croll - syaw * spitch * sroll
-        # x = cyaw * cpitch * sroll + syaw * spitch * croll
-        # y = syaw * cpitch * croll + cyaw * spitch * sroll
-        # z = cyaw * spitch * croll - syaw * cpitch * sroll
-
-        # method from gpwiki
-        x = sroll * cpitch * cyaw - croll * spitch * syaw
-        y = croll * spitch * sroll + sroll * cpitch * syaw
-        z = croll * cpitch * syaw - sroll * spitch * cyaw
-        w = croll * cpitch * cyaw + sroll * spitch * syaw
-
-        return 180 * w / pi, x, y, z
-
     def clean_results(self, dt):
         t = time() - 10  # forget devices after 10 seconds without any update
         for k, v in self.scan_results.items():
