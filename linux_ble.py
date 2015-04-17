@@ -97,11 +97,11 @@ class LinuxBle(object):
                             while offset < report_data_length:
                                 dlen, dtype = unpack(
                                     'BB', pkt[offset:offset + 2])
-                                if dtype == 0xff:
+                                if dtype == 0xff and dlen == 19:
                                     sensor_data = unpack(
-                                        '>' + 'h' * ((dlen - 3) // 2),
+                                        '>' + 'f' * 4,
                                         pkt[offset + 4:offset + dlen + 1])
-                                    if len(sensor_data) == 6:
+                                    if len(sensor_data) == 4:
                                         data['sensor'] = sensor_data
                                     break
                                 offset += dlen + 1
@@ -124,5 +124,3 @@ class LinuxBle(object):
                 status, ncmd, opcode = unpack("<BBH", pkt[3:7])
                 if status != 0:
                     print "uh oh...", status
-
-

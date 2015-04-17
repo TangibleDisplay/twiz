@@ -193,6 +193,11 @@ class TwizDevice(FloatLayout):
     ay = ListProperty([0, ])
     az = ListProperty([0, ])
 
+    qa = ListProperty([0, ])
+    qx = ListProperty([0, ])
+    qy = ListProperty([0, ])
+    qz = ListProperty([0, ])
+
     def update_data(self, data):
         for d in data:
             if d in ('name', 'power'):
@@ -200,14 +205,11 @@ class TwizDevice(FloatLayout):
 
             elif d == 'sensor':
                 d = data['sensor']
-                #  XXX performances!
-                self.ax = (self.ax + [d[0]])[-100:]
-                self.ay = (self.ay + [d[1]])[-100:]
-                self.az = (self.az + [d[2]])[-100:]
-
-                self.rx = (self.rx + [d[5]])[-100:]
-                self.ry = (self.ry + [d[4]])[-100:]
-                self.rz = (self.rz + [d[3]])[-100:]
+                q(d[0:4])
+                self.qx.append(d[0])
+                self.qy.append(d[1])
+                self.qz.append(d[2])
+                self.qa.append(d[3])
 
         self.last_update = time()
 

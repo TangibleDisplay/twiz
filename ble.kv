@@ -170,12 +170,12 @@ TabbedPanel:
                 size: '48sp', '48sp'
                 on_press: root.focus = 'euler'
                 state: 'down' if root.focus == 'euler' else 'normal'
-            Label:
-                text: '%s' % round(sum(root.device.rx[-root.avgsize:])/root.avgsize * 360. / 0xffff, 2) if root.device else ''
-            Label:
-                text: '%s' % round(sum(root.device.ry[-root.avgsize:])/root.avgsize * 360. / 0xffff, 2) if root.device else ''
-            Label:
-                text: '%s' % round(sum(root.device.rz[-root.avgsize:])/root.avgsize * 360. / 0xffff, 2) if root.device else ''
+            # Label:
+            #     text: '%s' % round(sum(root.device.rx[-root.avgsize:])/root.avgsize * 360. / 0xffff, 2) if root.device else ''
+            # Label:
+            #     text: '%s' % round(sum(root.device.ry[-root.avgsize:])/root.avgsize * 360. / 0xffff, 2) if root.device else ''
+            # Label:
+            #     text: '%s' % round(sum(root.device.rz[-root.avgsize:])/root.avgsize * 360. / 0xffff, 2) if root.device else ''
 
             ToggleButton:
                 text: 'accel'
@@ -186,16 +186,16 @@ TabbedPanel:
                 size: '48sp', '48sp'
                 on_press: root.focus = 'accelero'
                 state: 'down' if root.focus == 'accelero' else 'normal'
-            Label:
-                text: '%s' % round(sum(root.device.ax[-root.avgsize:])/root.avgsize * 4. / 0xffff, 2) if root.device else ''
-            Label:
-                text: '%s' % round(sum(root.device.ay[-root.avgsize:])/root.avgsize * 4. / 0xffff, 2) if root.device else ''
-            Label:
-                text: '%s' % round(sum(root.device.az[-root.avgsize:])/root.avgsize * 4. / 0xffff, 2) if root.device else ''
+            # Label:
+            #     text: '%s' % round(sum(root.device.ax[-root.avgsize:])/root.avgsize * 4. / 0xffff, 2) if root.device else ''
+            # Label:
+            #     text: '%s' % round(sum(root.device.ay[-root.avgsize:])/root.avgsize * 4. / 0xffff, 2) if root.device else ''
+            # Label:
+            #     text: '%s' % round(sum(root.device.az[-root.avgsize:])/root.avgsize * 4. / 0xffff, 2) if root.device else ''
 
-        Graph:
-            device: root.device
-            focus: root.focus
+        # Graph:
+        #     device: root.device
+        #     focus: root.focus
 
 <Graph>:
     focus: ''
@@ -267,7 +267,7 @@ TabbedPanel:
         scene: 'cube.obj'
         display_all: True
         obj_scale: 3.0
-        cam_rotation: app.convert_angle(root.device.rx[-1], root.device.ry[-1], root.device.rz[-1])
+        cam_rotation: 180 * root.device.qa[-1], root.device.qx[-1], root.device.qy[-1], root.device.qz[-1]
         cam_translation: 0, 0, -8
         light_sources:
             {
