@@ -35,6 +35,7 @@ except:
 from time import time
 from struct import pack, unpack
 import gc
+import q
 
 if platform == 'android':
     from androidhelpers import AndroidScanner, start_scanning, stop_scanning
@@ -205,7 +206,14 @@ class TwizDevice(FloatLayout):
 
             elif d == 'sensor':
                 d = data['sensor']
-                q(d[0:4])
+                # self.ax.append(d[0])
+                # self.ay.append(d[1])
+                # self.az.append(d[2])
+
+                # self.rx.append(d[5])
+                # self.ry.append(d[4])
+                # self.rz.append(d[3])
+
                 self.qx.append(d[0])
                 self.qy.append(d[1])
                 self.qz.append(d[2])
