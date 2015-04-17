@@ -223,6 +223,11 @@ class TwizDevice(FloatLayout):
     ay = ListProperty([0, ])
     az = ListProperty([0, ])
 
+    qa = ListProperty([0, ])
+    qx = ListProperty([0, ])
+    qy = ListProperty([0, ])
+    qz = ListProperty([0, ])
+
     def update_data(self, data):
         for d in data:
             if d in ('name', 'power'):
@@ -230,13 +235,19 @@ class TwizDevice(FloatLayout):
 
             elif d == 'sensor':
                 d = data['sensor']
-                self.ax.append(d[0])
-                self.ay.append(d[1])
-                self.az.append(d[2])
+                # self.ax.append(d[0])
+                # self.ay.append(d[1])
+                # self.az.append(d[2])
 
-                self.rx.append(d[5])
-                self.ry.append(d[4])
-                self.rz.append(d[3])
+                # self.rx.append(d[5])
+                # self.ry.append(d[4])
+                # self.rz.append(d[3])
+
+                q(d[0:4])
+                self.qx.append(d[0])
+                self.qy.append(d[1])
+                self.qz.append(d[2])
+                self.qa.append(d[3])
 
         self.last_update = time()
 
@@ -697,11 +708,11 @@ class BLEApp(App):
                             while offset < report_data_length:
                                 dlen, dtype = unpack(
                                     'BB', pkt[offset:offset + 2])
-                                if dtype == 0xff:
+                                if dtype == 0xff and dlen == 19:
                                     sensor_data = unpack(
-                                        '>' + 'h' * ((dlen - 3) // 2),
+                                        '>' + 'f' * 4,
                                         pkt[offset + 4:offset + dlen + 1])
-                                    if len(sensor_data) == 6:
+                                    if len(sensor_data) == 4:
                                         data['sensor'] = sensor_data
                                     break
                                 offset += dlen + 1

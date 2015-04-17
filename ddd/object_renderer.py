@@ -142,7 +142,6 @@ class ObjectRenderer(Widget):
 
         PushMatrix()
         self.cam_translate = Translate(self.cam_translation)
-        # Rotate(0, 1, 0, 0)
         self.cam_rot = Rotate(*self.cam_rotation)
         self.scale = Scale(self.obj_scale)
         UpdateNormalMatrix()
