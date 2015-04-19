@@ -41,18 +41,21 @@ to the gravity vector and how it is oriented compared to the north pole.
     make
     python setup.py install --user
     # optional: cd .. && rm -rf kivy
-    sudo apt-get install python-pygame
 
 ##### bluez:
 
     sudo apt-get install bluez libbluetooth-dev
 
-##### rtmidi2:
+##### rtmidi2 (optional, not used currently):
 
     sudo apt-get install python-pip libasound2-dev
     sudo pip install rtmidi2
 
-##### assimp:
+##### assimp (optional):
+
+assimp is a library for loading/rendering 3d models, installing it can make the
+3d visualisation slightly better, but the visualisation should be fine without
+it.
 
     sudo apt-get install cmake
     git clone https://github.com/assimp/assimp
