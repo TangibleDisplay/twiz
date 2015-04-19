@@ -144,9 +144,9 @@ class ObjectRenderer(Widget):
         PushMatrix()
         self.cam_translate = Translate(self.cam_translation)
         # Rotate(0, 1, 0, 0)
-        self.cam_rot_x = Rotate(self.cam_rotation[0], 1, 0, 0)
-        self.cam_rot_y = Rotate(self.cam_rotation[1], 0, 1, 0)
         self.cam_rot_z = Rotate(self.cam_rotation[2], 0, 0, 1)
+        self.cam_rot_y = Rotate(self.cam_rotation[1], 0, 1, 0)
+        self.cam_rot_x = Rotate(self.cam_rotation[0], 1, 0, 0)
         self.scale = Scale(self.obj_scale)
         UpdateNormalMatrix()
         if self.display_all:
@@ -158,9 +158,9 @@ class ObjectRenderer(Widget):
 
     def draw_object(self, obj_id):
         m = self._scene.objects[obj_id]
-        self.obj_rot_x = Rotate(self.obj_rotation[0], 1, 0, 0)
-        self.obj_rot_y = Rotate(self.obj_rotation[1], 0, 1, 0)
         self.obj_rot_z = Rotate(self.obj_rotation[2], 0, 0, 1)
+        self.obj_rot_y = Rotate(self.obj_rotation[1], 0, 1, 0)
+        self.obj_rot_x = Rotate(self.obj_rotation[0], 1, 0, 0)
         self.obj_translate = Translate(xyz=self.obj_translation)
 
         if len(m.indices) > 2 ** 16:
