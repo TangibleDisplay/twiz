@@ -125,7 +125,18 @@ TabbedPanel:
             size_hint_y: None
             height: self.minimum_height
             GridLayout:
-                cols: 2
+                cols: 3
+                Widget:
+                    size_hint_y: None
+                    height: 20
+                Widget:
+                    size_hint_y: None
+                    height: 20
+                Label:
+                    text: 'invert?'
+                    size_hint_y: None
+                    height: 20
+
                 Slider:
                     min: 0
                     max: 360
@@ -135,6 +146,10 @@ TabbedPanel:
                     height: 20
                 Label:
                     text: 'yaw: %s' % off_yaw.value
+                    size_hint_y: None
+                    height: 20
+                CheckBox:
+                    id: invert_yaw
                     size_hint_y: None
                     height: 20
                 Slider:
@@ -149,6 +164,11 @@ TabbedPanel:
                     text: 'pitch: %s' % off_pitch.value
                     size_hint_y: None
                     height: 20
+                CheckBox:
+                    id: invert_pitch
+                    height: 20
+                    size_hint_y: None
+                    height: 20
                 Slider:
                     min: 0
                     max: 360
@@ -158,6 +178,10 @@ TabbedPanel:
                     height: 20
                 Label:
                     text: 'roll: %s' % off_roll.value
+                    size_hint_y: None
+                    height: 20
+                CheckBox:
+                    id: invert_roll
                     size_hint_y: None
                     height: 20
 
@@ -335,9 +359,9 @@ TabbedPanel:
 
         cam_rotation:
             (
-            self._rot[0],
-            self._rot[1],
-            self._rot[2]
+            (self._rot[0] * (1 if app.root.ids.visu.ids.invert_yaw.active else 1)) % 360,
+            (self._rot[1] * (1 if app.root.ids.visu.ids.invert_pitch.active else 1)) % 360,
+            (self._rot[2] * (1 if app.root.ids.visu.ids.invert_roll.active else 1) % 360)
             ) if self._rot else (0, 0, 0)
         cam_translation: 0, 0, -8
         light_sources:
