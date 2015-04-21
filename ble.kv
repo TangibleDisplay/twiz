@@ -124,6 +124,42 @@ TabbedPanel:
             id: content
             size_hint_y: None
             height: self.minimum_height
+            GridLayout:
+                cols: 2
+                Slider:
+                    min: 0
+                    max: 360
+                    step: 1
+                    id: off_yaw
+                    size_hint_y: None
+                    height: 20
+                Label:
+                    text: 'yaw: %s' % off_yaw.value
+                    size_hint_y: None
+                    height: 20
+                Slider:
+                    min: 0
+                    max: 360
+                    step: 1
+                    id: off_pitch
+                    size_hint_y: None
+                    value: 270
+                    height: 20
+                Label:
+                    text: 'pitch: %s' % off_pitch.value
+                    size_hint_y: None
+                    height: 20
+                Slider:
+                    min: 0
+                    max: 360
+                    step: 1
+                    id: off_roll
+                    size_hint_y: None
+                    height: 20
+                Label:
+                    text: 'roll: %s' % off_roll.value
+                    size_hint_y: None
+                    height: 20
 
 <GraphZone>:
     avgsize: 100
@@ -283,7 +319,26 @@ TabbedPanel:
         scene: 'cube.obj'
         display_all: True
         obj_scale: 3.0
-        cam_rotation: root.device.convert_angles(root.device.qa[-1], root.device.qx[-1], root.device.qy[-1], root.device.qz[-1])
+        scene_rotation:
+            (
+            app.root.ids.visu.ids.off_roll.value,
+            app.root.ids.visu.ids.off_pitch.value,
+            app.root.ids.visu.ids.off_yaw.value,
+            )
+
+        _rot:
+            root.device.convert_angles(
+            root.device.qa[-1],
+            root.device.qx[-1],
+            root.device.qy[-1],
+            root.device.qz[-1])
+
+        cam_rotation:
+            (
+            self._rot[0],
+            self._rot[1],
+            self._rot[2]
+            ) if self._rot else (0, 0, 0)
         cam_translation: 0, 0, -8
         light_sources:
             {

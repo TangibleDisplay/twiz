@@ -30,6 +30,7 @@ class ObjectRenderer(Widget):
     obj_texture = StringProperty('')
     texture = ObjectProperty(None, allownone=True)
     cam_translation = ListProperty([0, 0, 0])
+    scene_rotation = ListProperty([0, 0, 0, 0])
     cam_rotation = ListProperty([0, 0, 0, 0])
     display_all = BooleanProperty(False)
     light_sources = DictProperty()
@@ -57,6 +58,11 @@ class ObjectRenderer(Widget):
         self.obj_rot_x.angle = self.obj_rotation[0]
         self.obj_rot_y.angle = self.obj_rotation[1]
         self.obj_rot_z.angle = self.obj_rotation[2]
+
+    def on_scene_rotation(self, *args):
+        self.scene_rot_x.angle = self.scene_rotation[0]
+        self.scene_rot_y.angle = self.scene_rotation[1]
+        self.scene_rot_z.angle = self.scene_rotation[2]
 
     def on_cam_rotation(self, *args):
         if self.cam_mode == 'quaternions':
@@ -151,9 +157,13 @@ class ObjectRenderer(Widget):
         if self.cam_mode == 'quaternions':
             self.cam_rot = Rotate(*self.cam_rotation)
         elif self.cam_mode == 'euler':
-            self.cam_rot_x = Rotate(self.cam_rotation[0], 1, 0, 0)
-            self.cam_rot_y = Rotate(self.cam_rotation[1], 0, 1, 0)
+            self.scene_rot_z = Rotate(self.scene_rotation[2], 0, 0, 1)
+            self.scene_rot_y = Rotate(self.scene_rotation[1], 0, 1, 0)
+            self.scene_rot_x = Rotate(self.scene_rotation[0], 1, 0, 0)
+
             self.cam_rot_z = Rotate(self.cam_rotation[2], 0, 0, 1)
+            self.cam_rot_y = Rotate(self.cam_rotation[1], 0, 1, 0)
+            self.cam_rot_x = Rotate(self.cam_rotation[0], 1, 0, 0)
 
         self.scale = Scale(self.obj_scale)
         UpdateNormalMatrix()

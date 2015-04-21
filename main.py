@@ -243,25 +243,30 @@ class TwizDevice(FloatLayout):
                 # self.ry.append(d[4])
                 # self.rz.append(d[3])
 
-                self.qx.append(d[0])
-                self.qy.append(d[1])
-                self.qz.append(d[2])
-                self.qa.append(d[3])
+                self.qx.append(d[1])
+                self.qy.append(d[2])
+                self.qz.append(d[3])
+                self.qa.append(d[0])
 
         self.last_update = time()
 
         self.send_updates()
 
     def convert_angles(self, *q):
-        yaw = atan2(2.0 * (q[1] * q[2] + q[0] * q[3]),
-                    q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3])
-        pitch = -asin(2.0 * (q[1] * q[3] - q[0] * q[2]))
-        roll = atan2(2.0 * (q[0] * q[1] + q[2] * q[3]),
-                     q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3])
-        pitch *= 180.0 / pi
-        yaw *= 180.0 / pi
-        yaw -= 4.11
-        roll *= 180.0 / pi
+        try:
+            yaw = atan2(2.0 * (q[1] * q[2] + q[0] * q[3]),
+                        q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3])
+            pitch = -asin(2.0 * (q[1] * q[3] - q[0] * q[2]))
+            roll = atan2(2.0 * (q[0] * q[1] + q[2] * q[3]),
+                         q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3])
+            pitch *= 180.0 / pi
+            yaw *= 180.0 / pi
+            yaw -= 4.11
+            roll *= 180.0 / pi
+        except ValueError:
+            pass
+            # import pudb; pudb.set_trace()
+
         return yaw, pitch, roll
 
     def on_active(self, *args):
