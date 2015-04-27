@@ -406,8 +406,6 @@ class BLEApp(App):
         print "writing config"
         self.config.write()
         print "config written"
-        self.profile.disable()
-        self.profile.dump_stats('/sdcard/twiz.profile')
 
     def open_content_dropdown(self, text_input):
         options = {
