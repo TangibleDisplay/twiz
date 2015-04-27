@@ -45,6 +45,7 @@ to the gravity vector and how it is oriented compared to the north pole.
 ##### bluez:
 
     sudo apt-get install bluez libbluetooth-dev
+    pip install --user pybluez # apparently needed in Linux Mint
 
 ##### rtmidi2 (optional, not used currently):
 
