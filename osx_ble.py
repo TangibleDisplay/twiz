@@ -26,10 +26,11 @@ class Ble(object):
             return
         name = data.objectForKey_(keys.objectAtIndex_(0)).cString()
         values = data.objectForKey_(keys.objectAtIndex_(1))
+
         sensor = c.get_from_ptr(values.bytes().arg_ref, 'c', values.length())
         uuid = peripheral.description().cString()
         if self.callback:
-            self.callback(uuid, rssi, name, sensor)
+            self.callback(uuid, rssi.intValue(), name, sensor)
         else:
             print uuid, name, sensor, rssi
             self.peripherals[uuid] = (peripheral, rssi)
