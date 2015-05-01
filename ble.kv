@@ -237,7 +237,7 @@ TabbedPanel:
 <ObjectView>:
     size_hint_y: None
     height: max(self.minimum_height, sp(300))
-    cols: 2
+    cols: 1
     #GridLayout:
     #    cols: 1
     #    size_hint_y: None
@@ -260,32 +260,44 @@ TabbedPanel:
     #                device: root.device
     #                height: self.minimum_height
 
-    # View:
-    #     canvas.before:
-    #         Color:
-    #             rgba: 1, 1, 1, 1
-    #     scene: 'cube.obj'
-    #     display_all: True
-    #     obj_scale: 3.0
-    #     cam_mode: 'quaternions'
-    #     cam_rotation:
-    #         root.device.quat_to_matrix(
-    #         root.device.qa[-1],
-    #         root.device.qx[-1],
-    #         root.device.qy[-1],
-    #         root.device.qz[-1])
-
-    #     cam_translation: 0, 0, -8
-    #     light_sources:
-    #         {
-    #         x: ([float(y) * 10 - 5 for y in bin(x)[2:].rjust(3, '0')] + [1.0])
-    #         for x in range(8)
-    #         }
-
+    Label:
+        text: 'quaternion to matrix'
+        size_hint_y: None
+        height: self.texture_size[1]
     View:
         canvas.before:
             Color:
                 rgba: 1, 1, 1, 1
+        size_hint_y: None
+        height: 200
+        scene: 'cube.obj'
+        display_all: True
+        obj_scale: 3.0
+        cam_mode: 'quaternions'
+        cam_rotation:
+            root.device.quat_to_matrix(
+            root.device.qa[-1],
+            root.device.qx[-1],
+            root.device.qy[-1],
+            root.device.qz[-1])
+
+        cam_translation: 0, 0, -8
+        light_sources:
+            {
+            x: ([float(y) * 10 - 5 for y in bin(x)[2:].rjust(3, '0')] + [1.0])
+            for x in range(8)
+            }
+
+    Label:
+        text: 'quaternion to axis-angle'
+        size_hint_y: None
+        height: self.texture_size[1]
+    View:
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+        size_hint_y: None
+        height: 200
         cam_mode: 'axis-angle'
         scene: 'cube.obj'
         display_all: True
@@ -304,10 +316,16 @@ TabbedPanel:
             for x in range(8)
             }
 
+    Label:
+        text: 'quaternion to euler'
+        size_hint_y: None
+        height: self.texture_size[1]
     View:
         canvas.before:
             Color:
                 rgba: 1, 1, 1, 1
+        size_hint_y: None
+        height: 200
         cam_mode: 'euler'
         scene: 'cube.obj'
         display_all: True
