@@ -239,7 +239,7 @@ class TwizDevice(FloatLayout):
             z = q[3] / s
         else:
             x = y = z = 0
-        return a, x, y, z
+        return a * 180 / pi, x, y, z
 
     def quat_to_euler(self, *q):
         yaw = atan2(2.0 * (q[1] * q[2] + q[0] * q[3]),
