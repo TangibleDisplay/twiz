@@ -13,6 +13,7 @@ from kivy.graphics import (
     Callback, PushMatrix, PopMatrix, Rotate, Translate, Scale,
     Rectangle, Color, Mesh, UpdateNormalMatrix, Canvas)
 from kivy.graphics.transformation import Matrix
+from kivy.graphics.context_instructions import Transform
 from kivy.graphics.opengl import (
     glEnable, glDisable, GL_DEPTH_TEST)
 from kivy.properties import (
@@ -59,13 +60,15 @@ class ObjectRenderer(Widget):
         self.obj_rot_z.angle = self.obj_rotation[2]
 
     def on_cam_rotation(self, *args):
-        if self.cam_mode == 'quaternions':
+        if self.cam_mode == 'axis-angle':
             self.cam_rot.angle = self.cam_rotation[0]
             self.cam_rot.axis = tuple(self.cam_rotation[1:])
         elif self.cam_mode == 'euler':
             self.cam_rot_x.angle = self.cam_rotation[0]
             self.cam_rot_y.angle = self.cam_rotation[1]
             self.cam_rot_z.angle = self.cam_rotation[2]
+        elif self.cam_mode == 'quaternions':
+            self.cam_rot.matrix.set(self.cam_rotation)
 
     def on_obj_translation(self, *args):
         self.obj_translate.xyz = self.cam_translation
@@ -148,12 +151,14 @@ class ObjectRenderer(Widget):
 
         PushMatrix()
         self.cam_translate = Translate(self.cam_translation)
-        if self.cam_mode == 'quaternions':
+        if self.cam_mode == 'axis-angle':
             self.cam_rot = Rotate(*self.cam_rotation)
         elif self.cam_mode == 'euler':
-            self.cam_rot_x = Rotate(self.cam_rotation[0], 1, 0, 0)
-            self.cam_rot_y = Rotate(self.cam_rotation[1], 0, 1, 0)
             self.cam_rot_z = Rotate(self.cam_rotation[2], 0, 0, 1)
+            self.cam_rot_y = Rotate(self.cam_rotation[1], 0, 1, 0)
+            self.cam_rot_x = Rotate(self.cam_rotation[0], 1, 0, 0)
+        elif self.cam_mode == 'quaternions':
+            self.cam_rot = Transform()
 
         self.scale = Scale(self.obj_scale)
         UpdateNormalMatrix()
