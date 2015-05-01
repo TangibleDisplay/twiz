@@ -224,9 +224,10 @@ class TwizDevice(FloatLayout):
 
     def quat_to_matrix(self, qw, qx, qy, qz):
         return (
-            (1 - 2 * qy ** 2 - 2 * qz ** 2, 2 * qx * qy - 2 * qz * qw,     2 * qx * qz + 2 * qy * qw    ),  # noqa
-            (2 * qx * qy + 2 * qz * qw,     1 - 2 * qx ** 2 - 2 * qz ** 2, 2 * qy * qz - 2 * qx * qw    ),  # noqa
-            (2 * qx * qz - 2 * qy * qw,     2 * qy * qz + 2 * qx * qw,     1 - 2 * qx ** 2 - 2 * qy ** 2),  # noqa
+            (1 - 2 * qy ** 2 - 2 * qz ** 2, 2 * qx * qy - 2 * qz * qw,     2 * qx * qz + 2 * qy * qw    , 0),  # noqa
+            (2 * qx * qy + 2 * qz * qw,     1 - 2 * qx ** 2 - 2 * qz ** 2, 2 * qy * qz - 2 * qx * qw    , 0),  # noqa
+            (2 * qx * qz - 2 * qy * qw,     2 * qy * qz + 2 * qx * qw,     1 - 2 * qx ** 2 - 2 * qy ** 2, 1),  # noqa
+            (0, 0, 0, 1)
         )
 
     def quat_to_angle_axis(self, *q):
