@@ -232,7 +232,7 @@ class TwizDevice(FloatLayout):
     def quat_to_angle_axis(self, *q):
         a = 2 * acos(q[0])
         # assuming q is normalized
-        s = (q[0] * (1 - q[0])) ** .5
+        s = (1 - q[0] ** 2) ** .5
         if s > 0:
             x = q[1] / s
             y = q[2] / s
