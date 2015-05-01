@@ -286,10 +286,10 @@ TabbedPanel:
         canvas.before:
             Color:
                 rgba: 1, 1, 1, 1
+        cam_mode: 'axis-angle'
         scene: 'cube.obj'
         display_all: True
         obj_scale: 3.0
-        cam_mode: 'axis-angle'
         cam_rotation:
             root.device.quat_to_angle_axis(
             root.device.qa[-1],
