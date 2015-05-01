@@ -18,7 +18,7 @@ from kivy.utils import platform
 from kivy.core.window import Window
 Window.softinput_mode = 'resize'
 
-from math import cos, sin, pi, atan2, asin
+from math import pi, atan2, asin, acos
 from socket import socket, AF_INET, SOCK_DGRAM
 from uuid import uuid4 as uuid
 try:
@@ -222,7 +222,26 @@ class TwizDevice(FloatLayout):
 
         self.send_updates()
 
-    def convert_angles(self, *q):
+    def quat_to_matrix(self, qw, qx, qy, qz):
+        return (
+            (1 - 2 * qy ** 2 - 2 * qz ** 2, 2 * qx * qy - 2 * qz * qw,     2 * qx * qz + 2 * qy * qw    ),  # noqa
+            (2 * qx * qy + 2 * qz * qw,     1 - 2 * qx ** 2 - 2 * qz ** 2, 2 * qy * qz - 2 * qx * qw    ),  # noqa
+            (2 * qx * qz - 2 * qy * qw,     2 * qy * qz + 2 * qx * qw,     1 - 2 * qx ** 2 - 2 * qy ** 2),  # noqa
+        )
+
+    def quat_to_angle_axis(self, *q):
+        a = 2 * acos(q[0])
+        # assuming q is normalized
+        s = (q[0] * (1 - q[0])) ** .5
+        if s > 0:
+            x = q[1] / s
+            y = q[2] / s
+            z = q[3] / s
+        else:
+            x = y = z = 0
+        return a, x, y, z
+
+    def quat_to_euler(self, *q):
         yaw = atan2(2.0 * (q[1] * q[2] + q[0] * q[3]),
                     q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3])
         pitch = -asin(2.0 * (q[1] * q[3] - q[0] * q[2]))

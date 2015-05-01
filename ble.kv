@@ -260,6 +260,28 @@ TabbedPanel:
     #                device: root.device
     #                height: self.minimum_height
 
+    # View:
+    #     canvas.before:
+    #         Color:
+    #             rgba: 1, 1, 1, 1
+    #     scene: 'cube.obj'
+    #     display_all: True
+    #     obj_scale: 3.0
+    #     cam_mode: 'quaternions'
+    #     cam_rotation:
+    #         root.device.quat_to_matrix(
+    #         root.device.qa[-1],
+    #         root.device.qx[-1],
+    #         root.device.qy[-1],
+    #         root.device.qz[-1])
+
+    #     cam_translation: 0, 0, -8
+    #     light_sources:
+    #         {
+    #         x: ([float(y) * 10 - 5 for y in bin(x)[2:].rjust(3, '0')] + [1.0])
+    #         for x in range(8)
+    #         }
+
     View:
         canvas.before:
             Color:
@@ -267,7 +289,14 @@ TabbedPanel:
         scene: 'cube.obj'
         display_all: True
         obj_scale: 3.0
-        cam_rotation: 180 * root.device.qa[-1], root.device.qx[-1], root.device.qy[-1], root.device.qz[-1]
+        cam_mode: 'axis-angle'
+        cam_rotation:
+            root.device.quat_to_angle_axis(
+            root.device.qa[-1],
+            root.device.qx[-1],
+            root.device.qy[-1],
+            root.device.qz[-1])
+
         cam_translation: 0, 0, -8
         light_sources:
             {
@@ -283,7 +312,12 @@ TabbedPanel:
         scene: 'cube.obj'
         display_all: True
         obj_scale: 3.0
-        cam_rotation: root.device.convert_angles(root.device.qa[-1], root.device.qx[-1], root.device.qy[-1], root.device.qz[-1])
+        cam_rotation:
+            root.device.quat_to_euler(
+            root.device.qa[-1],
+            root.device.qx[-1],
+            root.device.qy[-1],
+            root.device.qz[-1])
         cam_translation: 0, 0, -8
         light_sources:
             {
