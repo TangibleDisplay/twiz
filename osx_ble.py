@@ -1,5 +1,7 @@
-from pyobjus import autoclass, protocol, dereference, CArray
+from pyobjus import autoclass, protocol, CArray
 from pyobjus.dylib_manager import load_framework, INCLUDE
+
+NSData = autoclass('NSData')
 
 (CBCentralManagerStateUnknown,
  CBCentralManagerStateResetting,
@@ -10,8 +12,8 @@ from pyobjus.dylib_manager import load_framework, INCLUDE
 
 c = CArray()
 
-class Ble(object):
 
+class Ble(object):
     @protocol('CBCentralManagerDelegate')
     def centralManagerDidUpdateState_(self, central):
         print 'central state', central.state
@@ -33,7 +35,7 @@ class Ble(object):
             self.callback(uuid, rssi.intValue(), name, sensor)
         else:
             print uuid, name, sensor, rssi
-            self.peripherals[uuid] = (peripheral, rssi)
+        self.peripherals[uuid] = (peripheral, rssi)
 
     def check_le(self, central):
         state = central.state
@@ -49,13 +51,35 @@ class Ble(object):
         elif state == CBCentralManagerStateUnsupported:
             print 'CentralManager: This hardware doesnt support BLE'
 
+    def connect(self, peripheral):
+        self.central.connectPeripheral_options(peripheral, None, None)
+
+    @protocol('CBCentralManagerDelegate')
+    def centralManager_didConnectPeripheral(self, central, peripheral):
+        value = NSData.dataWithBytes(0b100, 1)
+        characteristic = 0x0014
+        # 0 = with_response, 1 = without_response
+        write_type = 1
+
+        peripheral.writeValue_forCharacteristic_type_(
+            value, characteristic, write_type)
+
+        peripheral.setNotifyValue(True, characteristic)
+
+    @protocol('CBPeripheralDelegate')
+    def peripheral_didUpdateNotificationStateForCharacteristic_(peripheral, characteristic):
+        # probably needs to decode like for advertising
+        # sensor = c.get_from_ptr(values.bytes().arg_ref, 'c', values.length())
+        print "received new value for characteristic!", characteristic.value
+        pass
+
     def create(self):
         self.callback = None
         self.peripherals = {}
         load_framework(INCLUDE.IOBluetooth)
         CBCentralManager = autoclass('CBCentralManager')
         self.central = CBCentralManager.alloc().initWithDelegate_queue_(
-                self, None)
+            self, None)
 
     def start_scan(self):
         print 'Scanning started'
