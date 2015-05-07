@@ -1,5 +1,7 @@
 from pyobjus import autoclass, protocol, CArray
 from pyobjus.dylib_manager import load_framework, INCLUDE
+from kivy.clock import Clock
+from pprint import pprint as pp
 
 NSData = autoclass('NSData')
 
@@ -35,6 +37,8 @@ class Ble(object):
             self.callback(uuid, rssi.intValue(), name, sensor)
         else:
             print uuid, name, sensor, rssi
+        if uuid not in self.peripherals:
+            self.connect(peripheral)
         self.peripherals[uuid] = (peripheral, rssi)
 
     def check_le(self, central):
@@ -52,22 +56,75 @@ class Ble(object):
             print 'CentralManager: This hardware doesnt support BLE'
 
     def connect(self, peripheral):
-        self.central.connectPeripheral_options(peripheral, None, None)
+        self.central.cancelPeripheralConnection_(peripheral)
+        self.central.connectPeripheral_options_(peripheral, None, None)
 
     @protocol('CBCentralManagerDelegate')
-    def centralManager_didConnectPeripheral(self, central, peripheral):
-        value = NSData.dataWithBytes(0b100, 1)
-        characteristic = 0x0014
-        # 0 = with_response, 1 = without_response
-        write_type = 1
+    def centralManager_didConnectPeripheral_(self, central, peripheral):
+        print "1"
+        print "known services: ", peripheral.services()
+        print "2"
+        if not peripheral.name().UTF8String():
+            return
+        CBUUID = autoclass('CBUUID')
+        #service = CBUUID.UUIDWithString_('00001901-0000-1000-8000-00805f9b34fb')
+        #peripheral.discoverServices_([service])
+        peripheral.discoverServices_(None)
+        check = lambda *x: self.check_services(peripheral)
+        Clock.schedule_interval(check, 1)
+        print "started discovery"
 
-        peripheral.writeValue_forCharacteristic_type_(
-            value, characteristic, write_type)
+    def check_services(self, peripheral):
+        services = peripheral.services()
+        print "check ", services
+        if services:
+            for s in range(services.count()):
+                service = services.objectAtIndex_(s)
+                if service in self.asked_services:
+                    continue
+                print service.UUID().data
+                self.asked_services.append(service)
+                CBUUID = autoclass('CBUUID')
+                # characteristic = CBUUID.UUIDWithString_('00002b01-0000-1000-8000-00805f9b34fb')
+                peripheral.discoverCharacteristics_forService_(None, service)
+                check = lambda *x: self.check_characteristics(peripheral, service)
+                Clock.schedule_interval(check, 1)
+            return False
 
-        peripheral.setNotifyValue(True, characteristic)
+    def check_characteristics(self, peripheral, service):
+        characteristics = service.characteristics()
+        if characteristics:
+            for c in range(characteristics.count()):
+                print "setting notif for char %s of %s" % (c, service)
+                characteristic = characteristics.objectAtIndex_(c)
+                peripheral.setNotifyValue_forCharacteristic_(True, characteristic)
+            check_value = lambda *x: self.check_value(peripheral, characteristic)
+            Clock.schedule_interval(check_value, 0)
+            return False
+
+    def check_value(self, peripheral, characteristic):
+        value = characteristic.value()
+        if value:
+            sensor = c.get_from_ptr(value.bytes().arg_ref, 'c', value.length())
+            name = peripheral.name().cString()
+            uuid = peripheral.description().cString()
+            self.callback(uuid, 0, name, sensor)
 
     @protocol('CBPeripheralDelegate')
-    def peripheral_didUpdateNotificationStateForCharacteristic_(peripheral, characteristic):
+    def peripheral_didDiscoverServices_(self, peripheral, error):
+        print peripheral.services
+        CBUUID = autoclass('CBUUID')
+        characteristic = CBUUID.UUIDWithString_('00002b01-0000-1000-00805f9')
+        print characteristic
+        peripheral.discoverCharacteristics_forService_([characteristic], service)
+
+    @protocol('CBPeripheralDelegate')
+    def peripheral_didDiscoverCharacteristicsForService_error_(self, peripheral, service, error):
+        print "discovered characteristic: ", service, service.characteristics
+        peripheral.setNotifyValue_forCharacteristic_(True, characteristic)
+
+    @protocol('CBPeripheralDelegate')
+    def peripheral_didUpdateNotificationStateForCharacteristic_error_(peripheral, characteristic):
         # probably needs to decode like for advertising
         # sensor = c.get_from_ptr(values.bytes().arg_ref, 'c', values.length())
         print "received new value for characteristic!", characteristic.value
@@ -83,6 +140,7 @@ class Ble(object):
 
     def start_scan(self):
         print 'Scanning started'
+        self.asked_services = []
         self.central.scanForPeripheralsWithServices_options_(None, None)
 
 
