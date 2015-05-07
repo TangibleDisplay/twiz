@@ -571,7 +571,8 @@ class BLEApp(App):
         self.update_device(device_data)
 
     def osx_parse_event(self, uuid, rssi, name, values):
-        values = values[2:]
+        if len(values) > 12:
+            values = values[2:]
         device_data = {
             'name': name,
             'power': rssi,

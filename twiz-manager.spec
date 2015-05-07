@@ -53,4 +53,5 @@ coll = COLLECT(exe,
 
 app = BUNDLE(coll,
              name='twiz-manager.app',
-             icon='data/Logo vertical.icns')
+	     )
+             # icon='data/Logo vertical.icns')
