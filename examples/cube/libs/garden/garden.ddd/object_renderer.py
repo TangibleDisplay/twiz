@@ -95,7 +95,6 @@ class ObjectRenderer(Widget):
         if not (self.scene and self.obj_id or self.display_all):
             return
 
-        print 'setting up the scene'
         with self.fbo:
             self.fbo['ambiant'] = self.ambiant
             self.fbo['diffuse'] = self.diffuse
@@ -107,7 +106,6 @@ class ObjectRenderer(Widget):
             self.cb = Callback(self.reset_gl_context)
 
     def on_scene(self, instance, value):
-        print "loading scene %s" % value
         self._scene = ObjFileLoader(resource_find(value))
         self.setup_canvas()
 

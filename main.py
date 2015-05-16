@@ -79,10 +79,8 @@ def hci_disable_le_scan(sock):
 
 
 def hci_toggle_le_scan(sock, enable):
-    print "toggle scan: ", enable
     cmd_pkt = pack("<BB", enable, 0x00)
     bluez.hci_send_cmd(sock, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, cmd_pkt)
-    print "sent toggle enable"
 
 
 def packed_bdaddr_to_string(bdaddr_packed):
@@ -237,6 +235,11 @@ class TwizDevice(FloatLayout):
                 self.ry.append(d[4])
                 self.rz.append(d[3])
 
+                if app.log_enabled:
+                    # TODO: for i in range(8): print ("x%s, y%s, z%s,") % (i, i, i),
+                    print('%s, ' * 3) % (self.ax[-1], self.ay[-1], self.az[-1]),
+                    app.vec_N = app.vec_N + 1
+
         self.last_update = time()
 
         self.send_updates()
@@ -373,6 +376,19 @@ class BLEApp(App):
     nexus4_fix = ConfigParserProperty(
         False, 'android', 'nexus4_fix', 'app', val_type=configbool)
 
+    log_enabled = BooleanProperty(False)
+    set_id = 0  # set id (need many for 1 type of gesture)
+    vec_N = 0   # number of vectors in this training set
+
+    # Each training set is on 1 line and it looks like this:
+    #           gest_type, id, x1,y1,z1, ..., xN,yN,zN, N
+    # ...with N = vec_N
+
+    # TODO: - standardize all training sets to have the same N
+    #       - add header at beginning of file:
+    #           gest_type, id, x1,y1,z1, ..., xN,yN,zN,
+    #       - only write in a file when these steps are done
+
     def build(self):
         self.init_ble()
         self.set_scanning(True)
@@ -382,7 +398,18 @@ class BLEApp(App):
         Clock.schedule_interval(self.clean_results, 1)
         if '--simulate' in sys.argv:
             Clock.schedule_once(self.simulate_twiz, 0)
+        Window.bind(on_key_down=self.toggle_logs)
         return super(BLEApp, self).build()
+
+    def toggle_logs(self, window, keycode, *args):
+        if keycode == 32:
+            self.log_enabled = not self.log_enabled
+            if self.log_enabled:
+                print('\nGest0, %s,') % (app.set_id),
+                self.set_id = self.set_id + 1
+            else:
+                print(self.vec_N),
+                self.vec_N = 0
 
     def on_pause(self, *args):
         return True
@@ -403,9 +430,7 @@ class BLEApp(App):
             )
 
     def on_stop(self, *args):
-        print "writing config"
         self.config.write()
-        print "config written"
 
     def open_content_dropdown(self, text_input):
         options = {
