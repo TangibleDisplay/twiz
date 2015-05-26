@@ -202,7 +202,7 @@ TabbedPanel:
     line_x: {'euler': root.device.rx, 'accelero': root.device.ax}[root.focus] if root.device else [0]
     line_y: {'euler': root.device.ry, 'accelero': root.device.ay}[root.focus] if root.device else [0]
     line_z: {'euler': root.device.rz, 'accelero': root.device.az}[root.focus] if root.device else [0]
-    data_len: min(max(map(len, (self.line_x, self.line_y, self.line_z))), 100)
+    data_len: max(map(len, (self.line_x, self.line_y, self.line_z)))
     max_value: 0x7fff
     min_value: -0x8000
     canvas:
@@ -213,7 +213,7 @@ TabbedPanel:
                 chain(*[
                 (root.x + x * self.width / root.data_len,
                 self.y + self.height * (y - self.min_value) / (root.max_value - root.min_value))
-                for x, y in enumerate(root.line_x[-100:])
+                for x, y in enumerate(root.line_x)
                 ]) if root.data_len and root.max_value and root.line_x else ()
         Color:
             rgba: color_y
@@ -222,7 +222,7 @@ TabbedPanel:
                 chain(*[
                 (root.x + x * self.width / root.data_len,
                 self.y + self.height * (y - self.min_value) / (root.max_value - root.min_value))
-                for x, y in enumerate(root.line_y[-100:])
+                for x, y in enumerate(root.line_y)
                 ]) if root.data_len and root.max_value and root.line_y else ()
         Color:
             rgba: color_z
@@ -231,7 +231,7 @@ TabbedPanel:
                 chain(*[
                 (root.x + x * self.width / root.data_len,
                 self.y + self.height * (y - self.min_value) / (root.max_value - root.min_value))
-                for x, y in enumerate(root.line_z[-100:])
+                for x, y in enumerate(root.line_z)
                 ]) if root.data_len and root.max_value and root.line_z else ()
 
 <ObjectView>:

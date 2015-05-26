@@ -229,13 +229,13 @@ class TwizDevice(FloatLayout):
 
             elif d == 'sensor':
                 d = data['sensor']
-                self.ax.append(d[0])
-                self.ay.append(d[1])
-                self.az.append(d[2])
+                self.ax = (self.ax + [d[0]])[-100:]
+                self.ay = (self.ay + [d[1]])[-100:]
+                self.az = (self.az + [d[2]])[-100:]
 
-                self.rx.append(d[5])
-                self.ry.append(d[4])
-                self.rz.append(d[3])
+                self.rx = (self.rx + [d[5]])[-100:]
+                self.ry = (self.ry + [d[4]])[-100:]
+                self.rz = (self.rz + [d[3]])[-100:]
 
         self.last_update = time()
 
