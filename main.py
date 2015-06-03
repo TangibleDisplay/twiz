@@ -401,6 +401,7 @@ class BLEApp(App):
         config.setdefaults('android', {
             'nexus4_fix': 0,
             })
+
     def build_settings(self, settings):
         settings.add_json_panel(
             'Twiz-manager',
@@ -422,6 +423,7 @@ class BLEApp(App):
             'accelerations + euler (0-0xffff)': 'ax,ay,az,rx,ry,rz',
             'accelerations + euler (0-1.0)': 'ax_d,ay_d,az_d,rx_d,ry_d,rz_d',
         }
+
         #d = DropDown(width=text_input.width)
         #for o in options:
         #    b = Button(text=o, size_hint_y=None)
@@ -432,6 +434,7 @@ class BLEApp(App):
         #d.open(text_input)
 
         p = Popup(title='message content', size_hint=(.9, .9))
+
         def callback(option):
             text_input.text = options.get(option, option)
             p.dismiss()
@@ -465,7 +468,6 @@ class BLEApp(App):
 
         p.add_widget(content)
         p.open()
-
 
     def clean_results(self, dt):
         t = time() - 10  # forget devices after 10 seconds without any update
