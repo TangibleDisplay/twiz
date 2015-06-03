@@ -264,7 +264,7 @@ class TwizDevice(FloatLayout):
         for c in content.split(' '):
             if c.isdigit() or c.startswith("'") and c.endswith("'"):
                 continue
-            if c.split('_')[0] not in app.sensor_list:
+            if c.split('_')[0] not in app.sensor_list + ['id']:
                 print "invalid sensor", c
                 return False
         return True
@@ -297,6 +297,10 @@ class TwizDevice(FloatLayout):
 
                     if i in app.sensor_list:
                         data.append(func(getattr(self, i)[-1]))
+
+                    elif i == 'id':
+                        data.append(self.name)
+
             # print "osc sending data", data
             sendto(data.getBinary(), (ip, int(port)))
 
