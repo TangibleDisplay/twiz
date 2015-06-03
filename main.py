@@ -272,6 +272,8 @@ class TwizDevice(FloatLayout):
     def send_osc_updates(self):
         sendto = app.osc_socket.sendto
         # XXX potential performances killer, maybe cache these somewhere
+        app.ensure_sections(self)
+
         for k, v in app.config.items(self.name + '-osc'):
             ip, port, address, content = v.split(',')
             if not self.check_osc_values(ip, port, address, content):
