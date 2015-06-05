@@ -11,10 +11,10 @@ pygame and python-liblo are required, they are packaged by main linux distributi
 ### usage
 
 ```
-python brica.py
+python bricka.py
 ```
 
-brica expects messages on port 1200, on the /head osc address and in the format
+bricka expects messages on port 12000, on the /head osc address and in the format
 
 ```
 double,double
