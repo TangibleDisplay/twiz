@@ -70,27 +70,6 @@ def configbool(value):
     return bool(value)
 
 
-def hci_enable_le_scan(sock):
-    hci_toggle_le_scan(sock, 0x01)
-
-
-def hci_disable_le_scan(sock):
-    hci_toggle_le_scan(sock, 0x00)
-
-
-def hci_toggle_le_scan(sock, enable):
-    print "toggle scan: ", enable
-    cmd_pkt = pack("<BB", enable, 0x00)
-    bluez.hci_send_cmd(sock, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, cmd_pkt)
-    print "sent toggle enable"
-
-
-def packed_bdaddr_to_string(bdaddr_packed):
-    return ':'.join('%02x' % i for i in unpack(
-        "<BBBBBB",
-        bdaddr_packed[:: -1]))
-
-
 class ObjectView(GridLayout):
     device = ObjectProperty(None, rebind=True)
 
@@ -488,27 +467,7 @@ class BLEApp(App):
             self.scanner.callback = self.osx_parse_event
 
         else:
-            try:
-                self.sock = sock = bluez.hci_open_dev()
-            except:
-                print "error accessing bluetooth device..."
-                sys.exit(1)
-
-            self.old_filter = sock.getsockopt(
-                bluez.SOL_HCI, bluez.HCI_FILTER, 14)
-
-            # perform a device inquiry on bluetooth device #0
-            # The inquiry should last 8 * 1.28 = 10.24 seconds
-            # before the inquiry is performed, bluez should flush its cache of
-            # previously discovered devices
-            self.flt = bluez.hci_filter_new()
-            bluez.hci_filter_all_events(self.flt)
-            bluez.hci_filter_set_ptype(self.flt, bluez.HCI_EVENT_PKT)
-            sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, self.flt)
-
-            self.parser_thread = Thread(target=self.linux_parse_events)
-            self.parser_thread.daemon = True
-            self.parser_thread.start()
+            self.scanner = LinuxBle(callback=self.update_device)
 
     def simulate_twiz(self, dt):
         self.root.ids.scan.add_widget(TwizSimulator())
@@ -540,9 +499,9 @@ class BLEApp(App):
         else:
             if value:
                 # hci_le_set_scan_parameters(sock)
-                hci_enable_le_scan(self.sock)
+                self.scanner.start()
             else:
-                hci_disable_le_scan(self.sock)
+                self.scanner.stop()
 
     def ensure_sections(self, device):
         section = device.name + '-osc'
@@ -634,7 +593,51 @@ class BLEApp(App):
 
         self.update_device(device_data)
 
-    def linux_parse_events(self, *args):
+
+class LinuxBle(object):
+    def __init__(self, callback=None):
+        try:
+            self.sock = sock = bluez.hci_open_dev()
+        except:
+            print "error accessing bluetooth device..."
+            sys.exit(1)
+
+        self.callback = callback or self._print_data
+
+        # perform a device inquiry on bluetooth device #0
+        # The inquiry should last 8 * 1.28 = 10.24 seconds
+        # before the inquiry is performed, bluez should flush its cache of
+        # previously discovered devices
+        self.flt = bluez.hci_filter_new()
+        bluez.hci_filter_all_events(self.flt)
+        bluez.hci_filter_set_ptype(self.flt, bluez.HCI_EVENT_PKT)
+        sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, self.flt)
+
+        self.parser_thread = Thread(target=self.parse_events)
+        self.parser_thread.daemon = True
+        self.parser_thread.start()
+
+    def _print_data(self, *args):
+        print(args)
+
+    def start(self):
+        self.hci_toggle_le_scan(self.sock, 0x01)
+
+    def stop(self):
+        self.hci_toggle_le_scan(self.sock, 0x00)
+
+    def hci_toggle_le_scan(self, sock, enable):
+        print "toggle scan: ", enable
+        cmd_pkt = pack("<BB", enable, 0x00)
+        bluez.hci_send_cmd(sock, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, cmd_pkt)
+        print "sent toggle enable"
+
+    def packed_bdaddr_to_string(self, bdaddr_packed):
+        return ':'.join('%02x' % i for i in unpack(
+            "<BBBBBB",
+            bdaddr_packed[:: -1]))
+
+    def parse_events(self, *args):
         while True:
             pkt = self.sock.recv(255)
 
@@ -653,7 +656,7 @@ class BLEApp(App):
                         data = {}
                         report_event_type = unpack(
                             "B", pkt[report_pkt_offset + 1])[0]
-                        addr = packed_bdaddr_to_string(
+                        addr = self.packed_bdaddr_to_string(
                             pkt[report_pkt_offset + 3:report_pkt_offset + 9])
                         report_data_length, = unpack(
                             "B", pkt[report_pkt_offset + 9])
@@ -665,8 +668,6 @@ class BLEApp(App):
                             name = pkt[
                                 report_pkt_offset + 11 + 1:
                                 report_pkt_offset + 11 + local_name_len]
-                            if not self.filter_scan_result(name):
-                                continue
                             data['name'] = name
 
                             dtype = 0
@@ -695,7 +696,7 @@ class BLEApp(App):
                         # print "\tRSSI:", rssi
                         data['power'] = rssi
 
-                        self.update_device(data)
+                        self.callback(data)
 
             elif event == bluez.EVT_CMD_STATUS:
                 status, ncmd, opcode = unpack("<BBH", pkt[3:7])
