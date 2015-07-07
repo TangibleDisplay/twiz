@@ -216,9 +216,9 @@ class TwizDevice(FloatLayout):
     rx = ListProperty([0, ])
     ry = ListProperty([0, ])
     rz = ListProperty([0, ])
-    cx = ListProperty([0, ])
-    cy = ListProperty([0, ])
-    cz = ListProperty([0, ])
+    cx = ListProperty([0, ]) # c?
+    cy = ListProperty([0, ]) # c?
+    cz = ListProperty([0, ]) # c?
     ax = ListProperty([0, ])
     ay = ListProperty([0, ])
     az = ListProperty([0, ])
@@ -235,18 +235,14 @@ class TwizDevice(FloatLayout):
 
             elif d == 'sensor':
                 d = data['sensor']
-                # self.ax.append(d[0])
-                # self.ay.append(d[1])
-                # self.az.append(d[2])
+                self.ax.append(d[0])
+                self.ay.append(d[1])
+                self.az.append(d[2])
 
-                # self.rx.append(d[5])
-                # self.ry.append(d[4])
-                # self.rz.append(d[3])
-
-                self.qx.append(d[0])
-                self.qy.append(d[1])
-                self.qz.append(d[2])
-                self.qa.append(d[3])
+                self.qa.append(d[4]/(0xFFFF/2))
+                self.qx.append(d[3]/(0xFFFF/2))
+                self.qy.append(d[5]/(0xFFFF/2))
+                self.qz.append(d[6]/(0xFFFF/2))
 
         self.last_update = time()
 
@@ -710,11 +706,11 @@ class BLEApp(App):
                             while offset < report_data_length:
                                 dlen, dtype = unpack(
                                     'BB', pkt[offset:offset + 2])
-                                if dtype == 0xff and dlen == 19:
+                                if dtype == 0xff and dlen == 17:
                                     sensor_data = unpack(
-                                        '>' + 'f' * 4,
-                                        pkt[offset + 4:offset + dlen + 1])
-                                    if len(sensor_data) == 4:
+                                        '>' + 'h' * 7,
+                                        pkt[offset + 4 : offset + dlen + 1])
+                                    if len(sensor_data) == 7:
                                         data['sensor'] = sensor_data
                                     break
                                 offset += dlen + 1
