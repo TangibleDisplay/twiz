@@ -18,7 +18,7 @@ from kivy.utils import platform
 from kivy.core.window import Window
 Window.softinput_mode = 'resize'
 
-from math import pi, atan2, asin, acos
+from math import pi, atan2, asin, acos, sqrt
 from socket import socket, AF_INET, SOCK_DGRAM
 from uuid import uuid4 as uuid
 try:
@@ -209,10 +209,18 @@ class TwizDevice(FloatLayout):
                 self.ay.append(d[1])
                 self.az.append(d[2])
 
-                self.qa.append(d[4]/(0xFFFF/2))
-                self.qx.append(d[3]/(0xFFFF/2))
-                self.qy.append(d[5]/(0xFFFF/2))
-                self.qz.append(d[6]/(0xFFFF/2))
+                dd = []
+                for i in range(3, 7):
+                    dd.append(d[i] / float(1<<15))
+
+                norm = sqrt((dd[0]**2 + dd[1]**2 + dd[2]**2 + dd[3]**2))
+                for i in range(0, 4):
+                    dd[i] /= norm
+
+                self.qa.append(dd[0])
+                self.qx.append(dd[1])
+                self.qy.append(dd[2])
+                self.qz.append(dd[3])
 
         self.last_update = time()
 
@@ -241,7 +249,11 @@ class TwizDevice(FloatLayout):
     def quat_to_euler(self, *q):
         yaw = atan2(2.0 * (q[1] * q[2] + q[0] * q[3]),
                     q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3])
-        pitch = -asin(2.0 * (q[1] * q[3] - q[0] * q[2]))
+        try:
+            pitch = -asin(2.0 * (q[1] * q[3] - q[0] * q[2]))
+        except:
+            pitch = 0
+            print "IMPOSSIBLE NORM:", sqrt((q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2))
         roll = atan2(2.0 * (q[0] * q[1] + q[2] * q[3]),
                      q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3])
         pitch *= 180.0 / pi
