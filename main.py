@@ -223,10 +223,7 @@ class TwizDevice(FloatLayout):
     ay = ListProperty([0, ])
     az = ListProperty([0, ])
 
-    qa = ListProperty([0, ])
-    qx = ListProperty([0, ])
-    qy = ListProperty([0, ])
-    qz = ListProperty([0, ])
+    q = ListProperty([[1,0,0,0], ])
 
     def update_data(self, data):
         for d in data:
@@ -239,32 +236,29 @@ class TwizDevice(FloatLayout):
                 self.ay.append(d[1])
                 self.az.append(d[2])
 
-                dd = []
-                for i in range(3, 7):
-                    dd.append(d[i] / float(1<<15))
+                norm = sqrt(d[3]**2 + d[4]**2 + d[5]**2 + d[6]**2)
 
-                norm = sqrt((dd[0]**2 + dd[1]**2 + dd[2]**2 + dd[3]**2))
-                for i in range(0, 4):
-                    dd[i] /= norm
+                # the quaternions must be normalized:
+                d2 = [d[x]/norm for x in range(3, 7)]
+                unitary = sqrt(d2[0]**2 + d2[1]**2 + d2[2]**2 + d2[3]**2)
 
-                self.qa.append(dd[0])
-                self.qx.append(dd[1])
-                self.qy.append(dd[2])
-                self.qz.append(dd[3])
+                # some floating point calculations produce errors
+                if unitary <= 1.0:
+                    self.q.append([d[x]/norm for x in range(3, 7)])
 
         self.last_update = time()
 
         self.send_updates()
 
-    def quat_to_matrix(self, qw, qx, qy, qz):
+    def quat_to_matrix(self, q):
         return (
-            (1 - 2 * qy ** 2 - 2 * qz ** 2, 2 * qx * qy - 2 * qz * qw,     2 * qx * qz + 2 * qy * qw    , 0),  # noqa
-            (2 * qx * qy + 2 * qz * qw,     1 - 2 * qx ** 2 - 2 * qz ** 2, 2 * qy * qz - 2 * qx * qw    , 0),  # noqa
-            (2 * qx * qz - 2 * qy * qw,     2 * qy * qz + 2 * qx * qw,     1 - 2 * qx ** 2 - 2 * qy ** 2, 1),  # noqa
+            (1 - 2 * q[2] ** 2 - 2 * q[3] ** 2, 2 * q[1] * q[2] - 2 * q[3] * q[0], 2 * q[1] * q[3] + 2 * q[2] * q[0] , 0),  # noqa
+            (2 * q[1] * q[2] + 2 * q[3] * q[0], 1 - 2 * q[1] ** 2 - 2 * q[3] ** 2, 2 * q[2] * q[3] - 2 * q[1] * q[0] , 0),  # noqa
+            (2 * q[1] * q[3] - 2 * q[2] * q[0], 2 * q[2] * q[3] + 2 * q[1] * q[0], 1 - 2 * q[1] ** 2 - 2 * q[2] ** 2, 1),   # noqa
             (0, 0, 0, 1)
         )
 
-    def quat_to_angle_axis(self, *q):
+    def quat_to_angle_axis(self, q):
         a = 2 * acos(q[0])
         # assuming q is normalized
         s = (1 - q[0] ** 2) ** .5
@@ -276,20 +270,19 @@ class TwizDevice(FloatLayout):
             x = y = z = 0
         return a * 180 / pi, x, y, z
 
-    def quat_to_euler(self, *q):
+    def quat_to_euler(self, q):
         yaw = atan2(2.0 * (q[1] * q[2] + q[0] * q[3]),
                     q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3])
-        try:
-            pitch = -asin(2.0 * (q[1] * q[3] - q[0] * q[2]))
-        except:
-            pitch = 0
-            print "IMPOSSIBLE NORM:", sqrt((q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2))
+        pitch = -asin(2.0 * (q[1] * q[3] - q[0] * q[2]))
         roll = atan2(2.0 * (q[0] * q[1] + q[2] * q[3]),
                      q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3])
         pitch *= 180.0 / pi
         yaw *= 180.0 / pi
         yaw -= 4.11
         roll *= 180.0 / pi
+
+        yaw, roll = roll, yaw # TODO clean
+
         return yaw, pitch, roll
 
     def on_active(self, *args):

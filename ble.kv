@@ -275,11 +275,7 @@ TabbedPanel:
         obj_scale: 3.0
         cam_mode: 'quaternions'
         cam_rotation:
-            root.device.quat_to_matrix(
-            root.device.qa[-1],
-            root.device.qx[-1],
-            root.device.qy[-1],
-            root.device.qz[-1])
+            root.device.quat_to_matrix(root.device.q[-1])
 
         cam_translation: 0, 0, -8
         light_sources:
@@ -303,11 +299,7 @@ TabbedPanel:
         display_all: True
         obj_scale: 3.0
         cam_rotation:
-            root.device.quat_to_angle_axis(
-            root.device.qa[-1],
-            root.device.qx[-1],
-            root.device.qy[-1],
-            root.device.qz[-1])
+            root.device.quat_to_angle_axis(root.device.q[-1])
 
         cam_translation: 0, 0, -8
         light_sources:
@@ -331,11 +323,7 @@ TabbedPanel:
         display_all: True
         obj_scale: 3.0
         cam_rotation:
-            root.device.quat_to_euler(
-            root.device.qa[-1],
-            root.device.qx[-1],
-            root.device.qy[-1],
-            root.device.qz[-1])
+            root.device.quat_to_euler(root.device.q[-1])
         cam_translation: 0, 0, -8
         light_sources:
             {
