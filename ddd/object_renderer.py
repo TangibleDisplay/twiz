@@ -69,7 +69,7 @@ class ObjectRenderer(Widget):
             self.cam_rot_z.angle = self.cam_rotation[2]
         elif self.cam_mode == 'quaternions':
             m = Matrix()
-            m.set(self.cam_rotation)
+            m.set(array=self.cam_rotation)
             self.cam_rot.matrix = m
 
     def on_obj_translation(self, *args):
