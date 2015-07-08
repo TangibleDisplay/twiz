@@ -18,7 +18,7 @@ from kivy.utils import platform
 from kivy.core.window import Window
 Window.softinput_mode = 'resize'
 
-from math import pi, atan2, asin, acos, sqrt
+from math import pi, atan2, asin, acos, sqrt, cos, sin
 from socket import socket, AF_INET, SOCK_DGRAM
 from uuid import uuid4 as uuid
 try:
@@ -60,6 +60,91 @@ def configbool(value):
     if isinstance(value, basestring):
         return value.lower() not in ('false', 'no', '')
     return bool(value)
+
+
+def hci_enable_le_scan(sock):
+    hci_toggle_le_scan(sock, 0x01)
+
+
+def hci_disable_le_scan(sock):
+    hci_toggle_le_scan(sock, 0x00)
+
+
+def hci_toggle_le_scan(sock, enable):
+    print "toggle scan: ", enable
+    cmd_pkt = pack("<BB", enable, 0x00)
+    bluez.hci_send_cmd(sock, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, cmd_pkt)
+    print "sent toggle enable"
+
+
+def packed_bdaddr_to_string(bdaddr_packed):
+    return ':'.join('%02x' % i for i in unpack(
+        "<BBBBBB",
+        bdaddr_packed[:: -1]))
+
+
+def euler_to_quat(rx, ry, rz):
+    c1 = cos(pi * rx / 180)
+    s1 = sin(pi * rx / 180)
+    c2 = cos(pi * ry / 180)
+    s2 = sin(pi * ry / 180)
+    c3 = cos(pi * rz / 180)
+    s3 = sin(pi * rz / 180)
+
+    w = c1 * c2 * c3 - s1 * s2 * s3
+    x = c1 * c2 * s3 + s1 * s2 * c3
+    y = s1 * c2 * c3 + c1 * s2 * s3
+    z = c1 * s2 * c3 - s1 * c2 * s3
+
+    return w, x, y, z
+
+
+def quat_to_matrix(q):
+    return (
+        (1 - 2 * q[2] ** 2 - 2 * q[3] ** 2, 2 * q[1] * q[2] - 2 * q[3] * q[0], 2 * q[1] * q[3] + 2 * q[2] * q[0], 0.0),  # noqa
+        (2 * q[1] * q[2] + 2 * q[3] * q[0], 1 - 2 * q[1] ** 2 - 2 * q[3] ** 2, 2 * q[2] * q[3] - 2 * q[1] * q[0], 0.0),  # noqa
+        (2 * q[1] * q[3] - 2 * q[2] * q[0], 2 * q[2] * q[3] + 2 * q[1] * q[0], 1 - 2 * q[1] ** 2 - 2 * q[2] ** 2, 1.0),  # noqa
+        (0.0, 0.0, 0.0, 1.0)
+    )
+
+
+def quat_to_angle_axis(q):
+    a = 2 * acos(q[0])
+    # assuming q is normalized
+    s = (1 - q[0] ** 2) ** .5
+    if s > 0:
+        x = q[1] / s
+        y = q[2] / s
+        z = q[3] / s
+    else:
+        x = y = z = 0
+    return a * 180 / pi, x, y, z
+
+
+def quat_to_euler(q):
+    yaw = atan2(2.0 * (q[1] * q[2] + q[0] * q[3]),
+                q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3])
+    pitch = -asin(2.0 * (q[1] * q[3] - q[0] * q[2]))
+    roll = atan2(2.0 * (q[0] * q[1] + q[2] * q[3]),
+                 q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3])
+    pitch *= 180.0 / pi
+    yaw *= 180.0 / pi
+    yaw -= 4.11
+    roll *= 180.0 / pi
+
+    yaw, roll = roll, yaw  # TODO clean
+
+    return yaw, pitch, roll
+
+
+def q_mult(q1, q2):
+    w1, x1, y1, z1 = q1
+    w2, x2, y2, z2 = q2
+    w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
+    x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
+    y = w1 * y2 + y1 * w2 + z1 * x2 - x1 * z2
+    z = w1 * z2 + z1 * w2 + x1 * y2 - y1 * x2
+    return w, x, y, z
 
 
 class ObjectView(GridLayout):
@@ -220,41 +305,6 @@ class TwizDevice(FloatLayout):
 
         self.send_updates()
 
-    def quat_to_matrix(self, q):
-        return (
-            (1 - 2 * q[2] ** 2 - 2 * q[3] ** 2, 2 * q[1] * q[2] - 2 * q[3] * q[0], 2 * q[1] * q[3] + 2 * q[2] * q[0] , 0),  # noqa
-            (2 * q[1] * q[2] + 2 * q[3] * q[0], 1 - 2 * q[1] ** 2 - 2 * q[3] ** 2, 2 * q[2] * q[3] - 2 * q[1] * q[0] , 0),  # noqa
-            (2 * q[1] * q[3] - 2 * q[2] * q[0], 2 * q[2] * q[3] + 2 * q[1] * q[0], 1 - 2 * q[1] ** 2 - 2 * q[2] ** 2, 1),   # noqa
-            (0, 0, 0, 1)
-        )
-
-    def quat_to_angle_axis(self, q):
-        a = 2 * acos(q[0])
-        # assuming q is normalized
-        s = (1 - q[0] ** 2) ** .5
-        if s > 0:
-            x = q[1] / s
-            y = q[2] / s
-            z = q[3] / s
-        else:
-            x = y = z = 0
-        return a * 180 / pi, x, y, z
-
-    def quat_to_euler(self, q):
-        yaw = atan2(2.0 * (q[1] * q[2] + q[0] * q[3]),
-                    q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3])
-        pitch = -asin(2.0 * (q[1] * q[3] - q[0] * q[2]))
-        roll = atan2(2.0 * (q[0] * q[1] + q[2] * q[3]),
-                     q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3])
-        pitch *= 180.0 / pi
-        yaw *= 180.0 / pi
-        yaw -= 4.11
-        roll *= 180.0 / pi
-
-        yaw, roll = roll, yaw # TODO clean
-
-        return yaw, pitch, roll
-
     def on_active(self, *args):
         if self.active:
             app.ensure_sections(self)
@@ -396,6 +446,13 @@ class BLEApp(App):
         '', 'general', 'device_filter', 'app', val_type=str)
     nexus4_fix = ConfigParserProperty(
         False, 'android', 'nexus4_fix', 'app', val_type=configbool)
+
+    offset_rx = ConfigParserProperty(
+        0, 'general', 'offset_rx', 'app', val_type=float)
+    offset_ry = ConfigParserProperty(
+        0, 'general', 'offset_ry', 'app', val_type=float)
+    offset_rz = ConfigParserProperty(
+        0, 'general', 'offset_rz', 'app', val_type=float)
 
     def build(self):
         self.scanner = None

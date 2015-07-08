@@ -9,6 +9,11 @@
 #:set larger_line '46dp'
 #:import chain itertools.chain
 #:import sp kivy.metrics.sp
+#:import q_mult main.q_mult
+#:import quat_to_matrix main.quat_to_matrix
+#:import quat_to_angle_axis main.quat_to_angle_axis
+#:import quat_to_euler main.quat_to_euler
+#:import euler_to_quat main.euler_to_quat
 
 #:set twiz_address_width .30
 #:set twiz_id_width .15
@@ -118,12 +123,62 @@ TabbedPanel:
 
 <DevicesPanel@TabbedPanelItem>:
     text: 'visu'
+
     ScrollView:
-        GridLayout:
-            cols: 1
-            id: content
+        BoxLayout:
             size_hint_y: None
-            height: self.minimum_height
+            height: content.height
+
+            GridLayout:
+                cols: 1
+
+                View:
+                    canvas.before:
+                        Color:
+                            rgba: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 200
+                    scene: 'cube.obj'
+                    display_all: True
+                    obj_scale: 3.0
+                    cam_mode: 'quaternions'
+                    cam_rotation:
+                        quat_to_matrix(
+                        euler_to_quat(
+                        app.offset_rx, app.offset_ry, app.offset_rz))
+
+                    cam_translation: 0, 0, -8
+                    light_sources:
+                        {
+                        x: ([float(y) * 10 - 5 for y in bin(x)[2:].rjust(3, '0')] + [1.0])
+                        for x in range(8)
+                        }
+
+
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(20)
+                    Slider:
+                        value: app.offset_rx
+                        on_value: app.offset_rx = self.value
+                        min: 0
+                        max: 180
+                    Slider:
+                        value: app.offset_ry
+                        on_value: app.offset_ry = self.value
+                        min: 0
+                        max: 180
+                    Slider:
+                        value: app.offset_rz
+                        on_value: app.offset_rz = self.value
+                        min: 0
+                        max: 180
+
+            GridLayout:
+                cols: 1
+                id: content
+                size_hint_y: None
+                height: self.minimum_height
 
 <GraphZone>:
     avgsize: 100
@@ -275,7 +330,11 @@ TabbedPanel:
         obj_scale: 3.0
         cam_mode: 'quaternions'
         cam_rotation:
-            root.device.quat_to_matrix(root.device.q[-1])
+            quat_to_matrix(
+            q_mult(
+            euler_to_quat(
+            app.offset_rx, app.offset_ry, app.offset_rz),
+            root.device.q[-1]))
 
         cam_translation: 0, 0, -8
         light_sources:
@@ -299,7 +358,11 @@ TabbedPanel:
         display_all: True
         obj_scale: 3.0
         cam_rotation:
-            root.device.quat_to_angle_axis(root.device.q[-1])
+            quat_to_angle_axis(
+            q_mult(
+            euler_to_quat(
+            app.offset_rx, app.offset_ry, app.offset_rz),
+            root.device.q[-1]))
 
         cam_translation: 0, 0, -8
         light_sources:
@@ -323,7 +386,11 @@ TabbedPanel:
         display_all: True
         obj_scale: 3.0
         cam_rotation:
-            root.device.quat_to_euler(root.device.q[-1])
+            quat_to_euler(
+            q_mult(
+            euler_to_quat(
+            app.offset_rx, app.offset_ry, app.offset_rz),
+            root.device.q[-1]))
         cam_translation: 0, 0, -8
         light_sources:
             {
