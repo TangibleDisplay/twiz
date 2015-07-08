@@ -195,6 +195,7 @@ class TwizDevice(FloatLayout):
 
             elif d == 'sensor':
                 d = data['sensor']
+                #  XXX performances!
                 self.ax = (self.ax + [d[0]])[-100:]
                 self.ay = (self.ay + [d[1]])[-100:]
                 self.az = (self.az + [d[2]])[-100:]
