@@ -13,7 +13,6 @@ NSData = autoclass('NSData')
 
 c = CArray()
 
-
 class Ble(object):
     def check_le(self, central):
         state = central.state
@@ -30,8 +29,14 @@ class Ble(object):
             print 'CentralManager: This hardware doesnt support BLE'
 
     def connect(self, peripheral):
+        print "connecting"
+        self.stop_scan()
         self.central.cancelPeripheralConnection_(peripheral)
         self.central.connectPeripheral_options_(peripheral, None, None)
+
+    def disconnecte(self, peripheral):
+        # XXX !
+        print "Disconnect Not Implemented!"
 
     def create(self):
         self.callback = None
@@ -46,6 +51,10 @@ class Ble(object):
         self.asked_services = []
         self.central.scanForPeripheralsWithServices_options_(None, None)
 
+    def stop_scan(self):
+        print "stopping scan"
+        self.central.stopScan()
+
     @protocol('CBCentralManagerDelegate')
     def centralManagerDidUpdateState_(self, central):
         print 'central state', central.state
@@ -59,19 +68,20 @@ class Ble(object):
         count = keys.count()
         if count < 2:
             return
-        name = data.objectForKey_(keys.objectAtIndex_(count - 2)).cString()
+        name = peripheral.name.cString()
+        #name = data.objectForKey_(keys.objectAtIndex_(count - 2)).cString()
         values = data.objectForKey_(keys.objectAtIndex_(count - 1))
 
         sensor = c.get_from_ptr(values.bytes().arg_ref, 'c', values.length())
         uuid = peripheral.description().cString()
         if self.callback:
-            self.callback(uuid, rssi.intValue(), name, sensor)
+            self.callback(rssi.intValue(), name, sensor)
         else:
             print uuid, name, sensor, rssi
         if uuid not in self.peripherals:
-            print "connecting"
-            self.connect(peripheral)
-        self.peripherals[uuid] = (peripheral, rssi)
+            pass
+            #self.connect(peripheral)
+        self.peripherals[name] = (peripheral, rssi)
 
     @protocol('CBCentralManagerDelegate')
     def centralManager_didConnectPeripheral_(self, central, peripheral):
@@ -79,48 +89,72 @@ class Ble(object):
             return
         peripheral.delegate = self
         CBUUID = autoclass('CBUUID')
-        #service = CBUUID.UUIDWithString_('00001901-0000-1000-8000-00805f9b34fb')
-        #peripheral.discoverServices_([service])
-        peripheral.discoverServices_(None)
+        service = CBUUID.UUIDWithString_('1901')
+        peripheral.discoverServices_([service])
+        #peripheral.discoverServices_(None)
         #check = lambda *x: self.check_services(peripheral)
         #Clock.schedule_interval(check, 1)
         print "started discovery"
 
-    @protocol('CBCentralManagerDelegate')
-    def centralManager_didConnectPeripheral_(self, central, peripheral):
-        print "1"
-        print "known services: ", peripheral.services()
-        print "2"
-        if not peripheral.name().UTF8String():
-            return
-        CBUUID = autoclass('CBUUID')
-        #service = CBUUID.UUIDWithString_('00001901-0000-1000-8000-00805f9b34fb')
-        #peripheral.discoverServices_([service])
-        peripheral.discoverServices_(None)
-        check = lambda *x: self.check_services(peripheral)
-        Clock.schedule_interval(check, 1)
-        print "started discovery"
+    # @protocol('CBCentralManagerDelegate')
+    # def centralManager_didConnectPeripheral_(self, central, peripheral):
+    #     print "1"
+    #     print "known services: ", peripheral.services()
+    #     print "2"
+    #     if not peripheral.name().UTF8String():
+    #         return
+    #     CBUUID = autoclass('CBUUID')
+    #     #service = CBUUID.UUIDWithString_('00001901-0000-1000-8000-00805f9b34fb')
+    #     #peripheral.discoverServices_([service])
+    #     peripheral.discoverServices_(None)
+    #     check = lambda *x: self.check_services(peripheral)
+    #     Clock.schedule_interval(check, 1)
+    #     print "started discovery"
 
     @protocol('CBPeripheralDelegate')
     def peripheral_didDiscoverServices_(self, peripheral, error):
         print peripheral.services
         CBUUID = autoclass('CBUUID')
-        characteristic = CBUUID.UUIDWithString_('00002b01-0000-1000-00805f9')
-        print characteristic
-        peripheral.discoverCharacteristics_forService_([characteristic], service)
+
+        for i in range(peripheral.services.count()):
+            service = peripheral.services.objectAtIndex_(i)
+            if service.UUID.UUIDString.cString() == '1901':
+                break
+        else:
+            assert(0)
+
+        #characteristic = CBUUID.UUIDWithString_('2b01')
+        #print characteristic
+        # peripheral.discoverCharacteristics_forService_([characteristic], service)
+        peripheral.discoverCharacteristics_forService_([], service)
 
     @protocol('CBPeripheralDelegate')
     def peripheral_didDiscoverCharacteristicsForService_error_(self, peripheral, service, error):
         print "discovered characteristic: ", service, service.characteristics
-        peripheral.setNotifyValue_forCharacteristic_(True, characteristic)
+        for i in range(service.characteristics.count()):
+            ch = service.characteristics.objectAtIndex_(i)
+            if ch.UUID.UUIDString.cString() == '2B01':
+                peripheral.setNotifyValue_forCharacteristic_(True, ch)
+                print "set notify for chr {}".format(i)
 
     @protocol('CBPeripheralDelegate')
-    def peripheral_didUpdateNotificationStateForCharacteristic_error_(peripheral, characteristic):
+    def peripheral_didUpdateNotificationStateForCharacteristic_error_(self, peripheral, characteristic, error):
         # probably needs to decode like for advertising
         # sensor = c.get_from_ptr(values.bytes().arg_ref, 'c', values.length())
-        print "received new value for characteristic!", characteristic.value
+        print "characteristic: {} notifying: {}".format(characteristic.UUID.UUIDString.cString(), characteristic.isNotifying)
         pass
 
+    @protocol('CBPeripheralDelegate')
+    def peripheral_didUpdateValueForCharacteristic_error_(self, peripheral, characteristic, error):
+        # probably needs to decode like for advertising
+        # sensor = c.get_from_ptr(values.bytes().arg_ref, 'c', values.length())
+        data =  c.get_from_ptr(characteristic.value.bytes().arg_ref, 'c', characteristic.value.length())
+        name = peripheral.name.cString()
+        rssi = 0
+        if self.callback:
+            self.callback(rssi, name, data)
+        else:
+            print name, rsii, data
 
 if __name__ == '__main__':
 
