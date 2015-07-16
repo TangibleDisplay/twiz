@@ -50,10 +50,16 @@ class Ble(object):
         print 'Scanning started'
         self.asked_services = []
         self.central.scanForPeripheralsWithServices_options_(None, None)
+        if self.queue is not None:
+            Clock.schedule_interval(self.pop_queue, 0.04)
 
     def stop_scan(self):
         print "stopping scan"
         self.central.stopScan()
+
+    def pop_queue(self, dt):
+        if self.queue:
+            self.callback(*self.queue.pop(0))
 
     @protocol('CBCentralManagerDelegate')
     def centralManagerDidUpdateState_(self, central):
@@ -152,7 +158,11 @@ class Ble(object):
         name = peripheral.name.cString()
         rssi = 0
         if self.callback:
-            self.callback(rssi, name, data)
+            if self.queue is not None:
+                self.queue.append((rssi, name, data))
+
+            else:
+                self.callback(rssi, name, data)
         else:
             print name, rsii, data
 
