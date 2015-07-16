@@ -178,6 +178,7 @@ class TwizDevice(FloatLayout):
     power = NumericProperty(0)
     last_update = NumericProperty(0)
     display = BooleanProperty(False)
+    count = NumericProperty(0)
     rx = ListProperty([0, ])
     ry = ListProperty([0, ])
     rz = ListProperty([0, ])
@@ -189,6 +190,7 @@ class TwizDevice(FloatLayout):
     az = ListProperty([0, ])
 
     def update_data(self, data):
+        self.count += 1
         for d in data:
             if d in ('name', 'power'):
                 setattr(self, d, data[d])
@@ -210,6 +212,10 @@ class TwizDevice(FloatLayout):
     def on_active(self, *args):
         if self.active:
             app.ensure_sections(self)
+
+    def reset_count(self, *args):
+        print "{}/s".format(self.count)
+        self.count = 0
 
     def send_updates(self):
         if not self.active:
@@ -293,10 +299,14 @@ class TwizDevice(FloatLayout):
         if not self.display:
             app.remove_visu(self)
             app.scanner.disconnect(app.scanner.peripherals[self.name][0])
+            Clock.unschedule(self, reset_count)
 
         else:
             app.add_visu(self)
             app.scanner.connect(app.scanner.peripherals[self.name][0])
+            self.count = 0
+            Clock.schedule_interval(self.reset_count, 1)
+
 
 
 class TwizSimulator(TwizDevice):
