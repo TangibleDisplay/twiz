@@ -292,9 +292,11 @@ class TwizDevice(FloatLayout):
     def on_display(self, *args):
         if not self.display:
             app.remove_visu(self)
+            app.scanner.disconnect(app.scanner.peripherals[self.name][0])
 
         else:
             app.add_visu(self)
+            app.scanner.connect(app.scanner.peripherals[self.name][0])
 
 
 class TwizSimulator(TwizDevice):
@@ -570,7 +572,7 @@ class BLEApp(App):
 
         self.update_device(device_data)
 
-    def osx_parse_event(self, uuid, rssi, name, values):
+    def osx_parse_event(self, rssi, name, values):
         if len(values) > 12:
             values = values[2:]
         device_data = {
@@ -584,4 +586,5 @@ class BLEApp(App):
 
 if __name__ == '__main__':
     app = BLEApp()
-    app.run()
+    import cProfile
+    cProfile.run('app.run()', 'ble.profile')
