@@ -183,34 +183,34 @@ def list_devices():
              hwid: {hwid}
              power: {power}\
             '''.format(
-                name=name, desc=desc, service=service,
-                enumerator=enumerator, device_class=device_class,
-                device_class_guid=device_class_guid, address=address,
-                hwid=hwid, power=power)
+            name=name, desc=desc, service=service,
+            enumerator=enumerator, device_class=device_class,
+            device_class_guid=device_class_guid, address=address,
+            hwid=hwid, power=power)
 
 
     gattServiceGUID = GUID('00001901-0000-1000-8000-00805f9b34fb')
 
-    while SAPI.SetupDiEnumDeviceInterfaes(hdi, None, byref(gattServiceGUID), 
-        bytesneeded = DWORD()
-        # first time just to get the needed size, sigh
-        SAPI.SetupDiGetDeviceInterfaceDetails(
-            hdi, byref(devinfo_data), None, 0, byref(bytesneeded), None)
+    # while SAPI.SetupDiEnumDeviceInterfaes(hdi, None, byref(gattServiceGUID), 
+    #     bytesneeded = DWORD()
+    #     # first time just to get the needed size, sigh
+    #     SAPI.SetupDiGetDeviceInterfaceDetails(
+    #         hdi, byref(devinfo_data), None, 0, byref(bytesneeded), None)
 
-        class STRUCT(Structure):
-            _fields_ = [
-                ("cbSize", DWORD),
-                ("DevicePath", TCHAR * bytesneeded)]
+    #     class STRUCT(Structure):
+    #         _fields_ = [
+    #             ("cbSize", DWORD),
+    #             ("DevicePath", TCHAR * bytesneeded)]
 
-        details = new(STRUCT, cbSize=sizeof(STRUCT))
+    #     details = new(STRUCT, cbSize=sizeof(STRUCT))
 
-        SAPI.SetupDiGetDeviceInterfaceDetails(
-            hdi,
-            byref(devinfo_data),
-            byref(details),
-            bytesneeded,
-            None,
-            byref(devinfo_data))
+    #     SAPI.SetupDiGetDeviceInterfaceDetails(
+    #         hdi,
+    #         byref(devinfo_data),
+    #         byref(details),
+    #         bytesneeded,
+    #         None,
+    #         byref(devinfo_data))
 
     SAPI.SetupDiDestroyDeviceInfoList(hdi)
 
