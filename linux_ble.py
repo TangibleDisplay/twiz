@@ -95,13 +95,13 @@ class LinuxBle(object):
                             dtype = 0
                             offset = report_pkt_offset + 11 + local_name_len
                             while offset < report_data_length:
-                                dlen, dtype = unpack(
-                                    'BB', pkt[offset:offset + 2])
-                                if dtype == 0xff and dlen == 19:
+                                d = pkt[offset:]
+                                dlen, dtype = unpack('BB', d[:2])
+                                if dtype == 0xff and dlen == 17:
                                     sensor_data = unpack(
-                                        '>' + 'f' * 4,
-                                        pkt[offset + 4:offset + dlen + 1])
-                                    if len(sensor_data) == 4:
+                                        '>' + 'h' * 7,
+                                        d[4:dlen + 1])
+                                    if len(sensor_data) == 7:
                                         data['sensor'] = sensor_data
                                     break
                                 offset += dlen + 1
