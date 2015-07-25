@@ -587,5 +587,4 @@ class BLEApp(App):
 
 if __name__ == '__main__':
     app = BLEApp()
-    import cProfile
-    cProfile.run('app.run()', 'ble.profile')
+    app.run()
