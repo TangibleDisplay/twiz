@@ -292,11 +292,13 @@ class TwizDevice(FloatLayout):
     def on_display(self, *args):
         if not self.display:
             app.remove_visu(self)
-            app.scanner.disconnect(app.scanner.peripherals[self.name][0])
+            if hasattr(app.scanner, 'disconnect'):
+                app.scanner.disconnect(app.scanner.peripherals[self.name][0])
 
         else:
             app.add_visu(self)
-            app.scanner.connect(app.scanner.peripherals[self.name][0])
+            if hasattr(app.scanner, 'connect'):
+                app.scanner.connect(app.scanner.peripherals[self.name][0])
 
 
 class TwizSimulator(TwizDevice):
