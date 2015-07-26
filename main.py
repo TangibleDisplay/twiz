@@ -56,31 +56,11 @@ MIDI_SIGNALS = {
     'Note Aftertouch': 224,
 }
 
+
 def configbool(value):
     if isinstance(value, basestring):
         return value.lower() not in ('false', 'no', '')
     return bool(value)
-
-
-def hci_enable_le_scan(sock):
-    hci_toggle_le_scan(sock, 0x01)
-
-
-def hci_disable_le_scan(sock):
-    hci_toggle_le_scan(sock, 0x00)
-
-
-def hci_toggle_le_scan(sock, enable):
-    print "toggle scan: ", enable
-    cmd_pkt = pack("<BB", enable, 0x00)
-    bluez.hci_send_cmd(sock, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, cmd_pkt)
-    print "sent toggle enable"
-
-
-def packed_bdaddr_to_string(bdaddr_packed):
-    return ':'.join('%02x' % i for i in unpack(
-        "<BBBBBB",
-        bdaddr_packed[:: -1]))
 
 
 def euler_to_quat(rx, ry, rz):
@@ -100,6 +80,7 @@ def euler_to_quat(rx, ry, rz):
 
 
 def quat_to_matrix(q):
+    q = q[0], -q[1], -q[2], -q[3]
     return (
         (1 - 2 * q[2] ** 2 - 2 * q[3] ** 2, 2 * q[1] * q[2] - 2 * q[3] * q[0], 2 * q[1] * q[3] + 2 * q[2] * q[0], 0.0),  # noqa
         (2 * q[1] * q[2] + 2 * q[3] * q[0], 1 - 2 * q[1] ** 2 - 2 * q[3] ** 2, 2 * q[2] * q[3] - 2 * q[1] * q[0], 0.0),  # noqa
