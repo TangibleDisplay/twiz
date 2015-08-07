@@ -350,6 +350,7 @@ class BLEApp(App):
         False, 'android', 'nexus4_fix', 'app', val_type=configbool)
 
     def build(self):
+        self.scanner = None
         self.init_ble()
         self.set_scanning(True)
         self.osc_socket = socket(AF_INET, SOCK_DGRAM)
@@ -459,7 +460,10 @@ class BLEApp(App):
             self.scanner.queue = []
 
         else:
-            self.scanner = LinuxBle(callback=self.update_device)
+            try:
+                self.scanner = LinuxBle(callback=self.update_device)
+            except OSError:
+                print "unable to get a ble device, try using the simulator"
 
     def simulate_twiz(self, dt):
         self.root.ids.scan.add_widget(TwizSimulator())
@@ -475,6 +479,9 @@ class BLEApp(App):
             start_scanning(self.scanner)
 
     def set_scanning(self, value):
+        if not self.scanner:
+            return
+
         if platform == 'android':
             if value:
                 start_scanning(self.scanner)

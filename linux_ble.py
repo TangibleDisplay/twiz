@@ -22,8 +22,7 @@ class LinuxBle(object):
         try:
             self.sock = sock = bluez.hci_open_dev()
         except:
-            print "error accessing bluetooth device..."
-            sys.exit(1)
+            raise OSError("error accessing bluetooth device...")
 
         self.callback = callback or self._print_data
 
