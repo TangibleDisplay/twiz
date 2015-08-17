@@ -19,6 +19,7 @@ INTENT_LOCK = False
 
 from android import activity
 
+
 def activity_result(request_code, result_code, data):
     print("get result: %s, %s, %s" % (
         request_code == REQUEST_ENABLE_BT, result_code, data))
@@ -55,7 +56,10 @@ class AndroidScanner(PythonJavaClass):
     @java_method("(Landroid/bluetooth/BluetoothDevice;I[B)V")
     def onLeScan(self, device, irssi, scan_record):
         if self.callback:
-            self.callback(device.getName(), device.getAddress(), irssi, scan_record)
+            self.callback(device.getName(),
+                          device.getAddress(),
+                          irssi,
+                          scan_record)
         else:
             print "no callback set"
             print "onLeScan"

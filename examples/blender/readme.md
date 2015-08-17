@@ -6,7 +6,7 @@ taken from https://github.com/frankiezafe/blender-pd
 
 start blender and open the .blend file
 
-select "run blender game engine" from the menus
+select "start game engine" from the "game" menus
 
 from the Twiz manager application, send the data to port 23000
 

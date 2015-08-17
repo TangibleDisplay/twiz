@@ -293,9 +293,13 @@ class TwizDevice(FloatLayout):
     def on_display(self, *args):
         if not self.display:
             app.remove_visu(self)
+            if hasattr(app.scanner, 'disconnect'):
+                app.scanner.disconnect(app.scanner.peripherals[self.name][0])
 
         else:
             app.add_visu(self)
+            if hasattr(app.scanner, 'connect'):
+                app.scanner.connect(app.scanner.peripherals[self.name][0])
 
 
 class TwizSimulator(TwizDevice):
@@ -347,6 +351,7 @@ class BLEApp(App):
         False, 'android', 'nexus4_fix', 'app', val_type=configbool)
 
     def build(self):
+        self.scanner = None
         self.init_ble()
         self.set_scanning(True)
         self.osc_socket = socket(AF_INET, SOCK_DGRAM)
@@ -453,9 +458,13 @@ class BLEApp(App):
             self.scanner = Ble()
             self.scanner.create()
             self.scanner.callback = self.osx_parse_event
+            self.scanner.queue = []
 
         else:
-            self.scanner = LinuxBle(callback=self.update_device)
+            try:
+                self.scanner = LinuxBle(callback=self.update_device)
+            except OSError:
+                print "unable to get a ble device, try using the simulator"
 
     def simulate_twiz(self, dt):
         self.root.ids.scan.add_widget(TwizSimulator())
@@ -471,6 +480,9 @@ class BLEApp(App):
             start_scanning(self.scanner)
 
     def set_scanning(self, value):
+        if not self.scanner:
+            return
+
         if platform == 'android':
             if value:
                 start_scanning(self.scanner)
@@ -571,8 +583,9 @@ class BLEApp(App):
 
         self.update_device(device_data)
 
-    def osx_parse_event(self, uuid, rssi, name, values):
-        values = values[2:]
+    def osx_parse_event(self, rssi, name, values):
+        if len(values) > 12:
+            values = values[2:]
         device_data = {
             'name': name,
             'power': rssi,
