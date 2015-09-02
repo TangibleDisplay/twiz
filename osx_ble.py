@@ -145,4 +145,3 @@ class Ble(object):
                 self.callback(rssi, name, data)
         else:
             print name, rsii, data
->>>>>>> osx_connect

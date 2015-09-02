@@ -31,6 +31,7 @@ try:
 except:
     rtmidi2 = None
 
+
 from time import time
 from struct import pack, unpack
 import gc
@@ -44,6 +45,8 @@ elif platform == 'linux':
 
 __version__ = '1.0'
 
+PROFILE = False
+
 MIDI_SIGNALS = {
     176: 'Control',
     128: 'Note Off',
@@ -54,6 +57,7 @@ MIDI_SIGNALS = {
     'Note On': 144,
     'Note Aftertouch': 224,
 }
+
 
 def configbool(value):
     if isinstance(value, basestring):
@@ -604,4 +608,14 @@ class BLEApp(App):
 if __name__ == '__main__':
     app = BLEApp()
     import cProfile
-    cProfile.run('app.run()', 'ble.profile')
+    if PROFILE:
+        from time import gmtime
+        from os.path import join, normpath, expanduser
+        from os import makedirs
+        profile_path = join(normpath(expanduser(app.user_data_dir)),
+                            'profiling')
+        makedirs(profile_path)
+        filename = 'ble_{t.tm_year}-{t.tm_mon}-{t.tm_mday}:{t.tm_hour}-{t.tm_min}-{t.tm_sec}.profile'.format(t=gmtime())  # noqa
+        cProfile.run('app.run()', join(profile_path, filename))
+    else:
+        app.run()
