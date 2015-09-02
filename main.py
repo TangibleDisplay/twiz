@@ -20,7 +20,11 @@ Window.softinput_mode = 'resize'
 
 from socket import socket, AF_INET, SOCK_DGRAM
 from uuid import uuid4 as uuid
-from random import random, randint, gauss
+try:
+    from random import random, randint, gauss
+    NO_SIMULATE = False
+except ImportError as e:
+    NO_SIMULATE = e
 import sys
 try:
     import rtmidi2
@@ -355,6 +359,8 @@ class BLEApp(App):
             self.midi_out = rtmidi2.MidiOut().open_virtual_port(':0')
         Clock.schedule_interval(self.clean_results, 1)
         if '--simulate' in sys.argv:
+            if NO_SIMULATE:
+                raise NO_SIMULATE
             Clock.schedule_once(self.simulate_twiz, 0)
         return super(BLEApp, self).build()
 
