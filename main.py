@@ -607,8 +607,8 @@ class BLEApp(App):
 
 if __name__ == '__main__':
     app = BLEApp()
-    import cProfile
     if PROFILE:
+        import cProfile
         from time import gmtime
         from os.path import join, normpath, expanduser
         from os import makedirs
