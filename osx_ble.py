@@ -13,6 +13,7 @@ NSData = autoclass('NSData')
 
 c = CArray()
 
+
 class Ble(object):
     def check_le(self, central):
         state = central.state
@@ -24,7 +25,7 @@ class Ble(object):
         elif state == CBCentralManagerStatePoweredOff:
             print 'CentralManager: Bluetooth is powered off'
         elif state == CBCentralManagerStateUnauthorized:
-            print 'CentralManager: The application is not authorized to use BLE'
+            print 'CentralManager: The application is not authorized to use BLE'  # noqa
         elif state == CBCentralManagerStateUnsupported:
             print 'CentralManager: This hardware doesnt support BLE'
 
@@ -97,31 +98,9 @@ class Ble(object):
         CBUUID = autoclass('CBUUID')
         service = CBUUID.UUIDWithString_('1901')
         peripheral.discoverServices_([service])
-        #peripheral.discoverServices_(None)
-        #check = lambda *x: self.check_services(peripheral)
-        #Clock.schedule_interval(check, 1)
-        print "started discovery"
-
-    # @protocol('CBCentralManagerDelegate')
-    # def centralManager_didConnectPeripheral_(self, central, peripheral):
-    #     print "1"
-    #     print "known services: ", peripheral.services()
-    #     print "2"
-    #     if not peripheral.name().UTF8String():
-    #         return
-    #     CBUUID = autoclass('CBUUID')
-    #     #service = CBUUID.UUIDWithString_('00001901-0000-1000-8000-00805f9b34fb')
-    #     #peripheral.discoverServices_([service])
-    #     peripheral.discoverServices_(None)
-    #     check = lambda *x: self.check_services(peripheral)
-    #     Clock.schedule_interval(check, 1)
-    #     print "started discovery"
 
     @protocol('CBPeripheralDelegate')
     def peripheral_didDiscoverServices_(self, peripheral, error):
-        print peripheral.services
-        CBUUID = autoclass('CBUUID')
-
         for i in range(peripheral.services.count()):
             service = peripheral.services.objectAtIndex_(i)
             if service.UUID.UUIDString.cString() == '1901':
@@ -144,7 +123,8 @@ class Ble(object):
                 print "set notify for chr {}".format(i)
 
     @protocol('CBPeripheralDelegate')
-    def peripheral_didUpdateNotificationStateForCharacteristic_error_(self, peripheral, characteristic, error):
+    def peripheral_didUpdateNotificationStateForCharacteristic_error_(
+            self, peripheral, characteristic, error):
         # probably needs to decode like for advertising
         # sensor = c.get_from_ptr(values.bytes().arg_ref, 'c', values.length())
         print "characteristic: {} notifying: {}".format(characteristic.UUID.UUIDString.cString(), characteristic.isNotifying)
@@ -165,17 +145,3 @@ class Ble(object):
                 self.callback(rssi, name, data)
         else:
             print name, rsii, data
-
-if __name__ == '__main__':
-
-    from kivy.app import App
-    from kivy.uix.listview import ListView
-    from kivy.clock import Clock
-
-    class BleApp(App):
-        def build(self):
-            self.ble = Ble()
-            self.ble.create()
-            return ListView()
-
-    BleApp().run()
