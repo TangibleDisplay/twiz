@@ -18,7 +18,8 @@ else
 	ifeq ($(UNAME_S), Darwin)
 		installer=hdiutil create dist/$(project).dmg -srcfolder dist/$(project).app -ov
 		make_icon=tools/create_osx_icon.sh
-               pyinstaller=kivy /usr/local/bin/pyinstaller -w
+		pyinstaller=kivy /usr/local/bin/pyinstaller -w
+		condiment=/usr/local/bin/condiment
 	endif
 endif
 
