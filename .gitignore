@@ -1,4 +1,6 @@
 bin/
+build/
+dist/
 *.profile
 *.buildozer
 *.pyo
@@ -9,3 +11,7 @@ bin/
 *.swm
 *.un~
 *.ini
+*.c
+*.so
+*.orig
+*.rej
