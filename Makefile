@@ -6,6 +6,7 @@ ifdef ComSpec
 	condiment=python -m condiment
         pyinstaller=pyinstaller
 	installer="\Program Files (x86)\Inno Setup 5\ISCC.exe" $(project).iss
+	requirements=requirements_windows.txt
 else
 	UNAME_S = $(shell uname -s)
 	RM=rm -f
