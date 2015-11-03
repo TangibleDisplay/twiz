@@ -17,14 +17,15 @@ else
 	installer=tar -C dist -caf dist/$(project).tar.bz2 $(project)
 	make_icon=tools/create_icon.sh
 	python=python2
+	requirements=requirements_linux.txt
 	ifeq ($(UNAME_S), Darwin)
 		installer=hdiutil create dist/$(project).dmg -srcfolder dist/$(project).app -ov
 		make_icon=tools/create_osx_icon.sh
 		pyinstaller=kivy /usr/local/bin/pyinstaller -w
 		python=/usr/local/bin/kivy
 		condiment=/usr/local/bin/condiment
+		requirements=requirements_osx.txt
 	endif
-	requirements=requirements.txt
 endif
 
 #all: Prepare Cythonize Package Installer
