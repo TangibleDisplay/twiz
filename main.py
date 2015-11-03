@@ -605,17 +605,16 @@ class BLEApp(App):
         self.update_device(device_data)
 
 
-if __name__ == '__main__':
-    app = BLEApp()
-    if PROFILE:
-        import cProfile
-        from time import gmtime
-        from os.path import join, normpath, expanduser
-        from os import makedirs
-        profile_path = join(normpath(expanduser(app.user_data_dir)),
-                            'profiling')
-        makedirs(profile_path)
-        filename = 'ble_{t.tm_year}-{t.tm_mon}-{t.tm_mday}:{t.tm_hour}-{t.tm_min}-{t.tm_sec}.profile'.format(t=gmtime())  # noqa
-        cProfile.run('app.run()', join(profile_path, filename))
-    else:
-        app.run()
+app = BLEApp()
+if PROFILE:
+    import cProfile
+    from time import gmtime
+    from os.path import join, normpath, expanduser
+    from os import makedirs
+    profile_path = join(normpath(expanduser(app.user_data_dir)),
+                        'profiling')
+    makedirs(profile_path)
+    filename = 'ble_{t.tm_year}-{t.tm_mon}-{t.tm_mday}:{t.tm_hour}-{t.tm_min}-{t.tm_sec}.profile'.format(t=gmtime())  # noqa
+    cProfile.run('app.run()', join(profile_path, filename))
+else:
+    app.run()
