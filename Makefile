@@ -7,6 +7,7 @@ ifdef ComSpec
         pyinstaller=pyinstaller
 	installer="\Program Files (x86)\Inno Setup 5\ISCC.exe" $(project).iss
 	requirements=requirements_windows.txt
+	pip=pip install -r
 else
 	UNAME_S = $(shell uname -s)
 	RM=rm -f
@@ -18,6 +19,7 @@ else
 	make_icon=tools/create_icon.sh
 	python=python2
 	requirements=requirements_linux.txt
+	pip=pip install --user -r
 	ifeq ($(UNAME_S), Darwin)
 		installer=hdiutil create dist/$(project).dmg -srcfolder dist/$(project).app -ov
 		make_icon=tools/create_osx_icon.sh
@@ -25,6 +27,7 @@ else
 		python=/usr/local/bin/kivy
 		condiment=/usr/local/bin/condiment
 		requirements=requirements_osx.txt
+		pip=python -m pip install -r
 	endif
 endif
 
@@ -32,7 +35,7 @@ endif
 all: Prepare Cythonize Package Installer
 
 Prepare:
-	$(python) -m pip install -r $(requirements)
+	$(pip) $(requirements)
 
 Cythonize:
 	python setup.py build_ext --inplace
