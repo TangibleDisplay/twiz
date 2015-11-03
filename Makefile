@@ -27,7 +27,7 @@ else
 		python=/usr/local/bin/kivy
 		condiment=/usr/local/bin/condiment
 		requirements=requirements_osx.txt
-		pip=kivy -m pip install -r
+		pip=$(python) -m pip install -r
 	endif
 endif
 
