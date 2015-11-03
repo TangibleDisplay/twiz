@@ -29,12 +29,10 @@ else
 endif
 
 #all: Prepare Cythonize Package Installer
-all: Package Installer
+all: Prepare Cythonize Package Installer
 
 Prepare:
 	$(python) -m pip install -r $(requirements)
-	-$(MV) main.py _main.py
-	$(condiment) _main.py > main.py
 
 Cythonize:
 	python setup.py build_ext --inplace
