@@ -31,13 +31,13 @@ exe = EXE(pyz,
           strip=None,
           upx=True,
           console=False,
-          icon=join('data', 'Logo vertical.png'))
+          icon=join('data', 'logo.ico'))
 coll = COLLECT(exe,
                Tree('.',
                     excludes=[
                         '.git', '*.spec', '*.ini', '*.c', 'Makefile',
                         'build', 'dist', '*.pyo', '*.pyc', 'setup.py',
-                        'installer', '.gitignore', '*.spw', '*.swo',
+                        'installer', '.gitignore', '*.swp', '*.swo',
                         '*.swn', 'tools',
                         ]),
                Tree('../../../Applications/Kivy.app/Contents/Frameworks/SDL2.framework/'),
