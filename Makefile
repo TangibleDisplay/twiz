@@ -15,18 +15,22 @@ else
         pyinstaller=pyinstaller
 	installer=tar -C dist -caf dist/$(project).tar.bz2 $(project)
 	make_icon=tools/create_icon.sh
+	python=python2
 	ifeq ($(UNAME_S), Darwin)
 		installer=hdiutil create dist/$(project).dmg -srcfolder dist/$(project).app -ov
 		make_icon=tools/create_osx_icon.sh
 		pyinstaller=kivy /usr/local/bin/pyinstaller -w
+		python=/usr/local/bin/kivy
 		condiment=/usr/local/bin/condiment
 	endif
+	requirements=requirements.txt
 endif
 
 #all: Prepare Cythonize Package Installer
 all: Package Installer
 
 Prepare:
+	$(python) -m pip install -r $(requirements)
 	-$(MV) main.py _main.py
 	$(condiment) _main.py > main.py
 
