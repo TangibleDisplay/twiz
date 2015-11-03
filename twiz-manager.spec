@@ -10,15 +10,14 @@ if IS_LINUX:
 
     dylib.exclude_list = dylib.ExcludeList()
 
-from kivy.tools.packaging.pyinstaller_hooks import install_hooks
+from kivy.tools.packaging.pyinstaller_hooks import get_hooks
 from os.path import expanduser
-install_hooks(globals())
 
 a = Analysis(['main.py'],
              pathex=['.'],
              hiddenimports=['numpy.core.multiarray', 'pyobjus.protocols'],
              excludes=['gobject', 'gio', 'PIL', 'gst', 'gtk', 'gi', 'wx', 'twisted', 'curses'] + (['pygame'] if IS_LINUX else []),
-             runtime_hooks=None)
+             **get_hooks())
 
 pyz = PYZ(a.pure)
 
