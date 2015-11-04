@@ -32,7 +32,7 @@ version.filename = %(source.dir)s/main.py
 # version = 1.2.0
 
 # (list) Application requirements
-requirements = kivy==master
+requirements = kivy==master,pyjnius==4adf0aa
 
 # (list) Garden requirements
 #garden_requirements =
@@ -82,7 +82,7 @@ android.minapi = 18
 #android.p4a_dir =
 
 # (list) python-for-android whitelist
-#android.p4a_whitelist =
+android.p4a_whitelist =_lsprof*
 
 # (str) Android entry point, default is ok for Kivy-based app
 #android.entrypoint = org.renpy.android.PythonActivity

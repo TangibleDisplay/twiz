@@ -204,13 +204,24 @@ class TwizDevice(FloatLayout):
             elif d == 'sensor':
                 d = data['sensor']
                 #  XXX performances!
-                self.ax = (self.ax + [d[0]])[-100:]
-                self.ay = (self.ay + [d[1]])[-100:]
-                self.az = (self.az + [d[2]])[-100:]
+                ax, ay, az, rx, ry, rz =\
+                    self.ax, self.ay, self.az, self.rx, self.ry, self.rz
+                if len(ax) > 100:
+                    ax.pop(0)
+                    ay.pop(0)
+                    az.pop(0)
+                    rx.pop(0)
+                    ry.pop(0)
+                    rz.pop(0)
 
-                self.rx = (self.rx + [d[5]])[-100:]
-                self.ry = (self.ry + [d[4]])[-100:]
-                self.rz = (self.rz + [d[3]])[-100:]
+                _ax, _ay, _az, _rz, _ry, _rx = d
+                ax.append(_ax)
+                ay.append(_ay)
+                az.append(_az)
+
+                rx.append(_rx)
+                ry.append(_ry)
+                rz.append(_rz)
 
         self.last_update = time()
 
@@ -543,8 +554,10 @@ class BLEApp(App):
 
     @mainthread
     def update_device(self, data):
-        pd = self.scan_results.get(data.get('name', ''),
-                                   TwizDevice(active=app.auto_activate))
+        name = data.get('name', '')
+        pd = self.scan_results.get(name)
+        if not pd:
+            pd = TwizDevice(active=app.auto_activate)
         pd.update_data(data)
         results = self.root.ids.scan.ids.results
         if app.auto_display:
@@ -613,7 +626,10 @@ if PROFILE:
     from os import makedirs
     profile_path = join(normpath(expanduser(app.user_data_dir)),
                         'profiling')
-    makedirs(profile_path)
+    try:
+        makedirs(profile_path)
+    except:
+        pass
     filename = 'ble_{t.tm_year}-{t.tm_mon}-{t.tm_mday}:{t.tm_hour}-{t.tm_min}-{t.tm_sec}.profile'.format(t=gmtime())  # noqa
     cProfile.run('app.run()', join(profile_path, filename))
 else:
