@@ -60,6 +60,20 @@ TabbedPanel:
         cols: 2
 
         Label:
+            text: 'automatically display discovered modules'
+
+        Switch:
+            active: app.auto_display
+            on_active: app.auto_display = self.active
+
+        Label:
+            text: 'automatically activate known modules when detected'
+
+        Switch:
+            active: app.auto_activate
+            on_active: app.auto_activate = self.active
+
+        Label:
             text: 'use queue to smooth events on osx (adds a delay)'
 
         Switch:
@@ -67,6 +81,15 @@ TabbedPanel:
             on_active:
                 app.osx_queue_fix = self.active
             disabled: platform != 'macosx'
+
+        Label:
+            text: 'use nexus 4/7 fix (android only)'
+
+        Switch:
+            active: app.nexus4_fix
+            on_active:
+                app.nexus4_fix = self.active
+            disabled: platform != 'android'
 
 <About@TabbedPanelItem>:
     text: 'About'

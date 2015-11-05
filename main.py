@@ -362,9 +362,9 @@ class BLEApp(App):
     sensor_list = ListProperty(
         ['rx', 'ry', 'rz', 'ax', 'ay', 'az'])
     auto_activate = ConfigParserProperty(
-        0, 'general', 'auto_activate', 'app', val_type=int)
+        False, 'general', 'auto_activate', 'app', val_type=configbool)
     auto_display = ConfigParserProperty(
-        0, 'general', 'auto_display', 'app', val_type=int)
+        False, 'general', 'auto_display', 'app', val_type=configbool)
     device_filter = ConfigParserProperty(
         '', 'general', 'device_filter', 'app', val_type=str)
     nexus4_fix = ConfigParserProperty(
