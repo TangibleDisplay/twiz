@@ -15,6 +15,7 @@ from kivy.animation import Animation
 import ddd  # noqa
 from kivy.lib.osc.OSC import OSCMessage
 from kivy.utils import platform
+from kivy.lang import Builder
 from kivy.core.window import Window
 Window.softinput_mode = 'resize'
 
