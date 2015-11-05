@@ -480,6 +480,7 @@ TabbedPanel:
             text: '%sdb' % root.power
             size_hint_x: twiz_power_width
         CheckBox:
+            active: root.active
             on_active: root.active = self.active
             size_hint_x: twiz_activate_width
         CheckBox:
