@@ -51,8 +51,7 @@ class Ble(object):
         print 'Scanning started'
         self.asked_services = []
         self.central.scanForPeripheralsWithServices_options_(None, None)
-        if self.queue is not None:
-            Clock.schedule_interval(self.pop_queue, 0.04)
+        Clock.schedule_interval(self.pop_queue, 0.04)
 
     def stop_scan(self):
         print "stopping scan"
@@ -136,7 +135,8 @@ class Ble(object):
         # sensor = c.get_from_ptr(values.bytes().arg_ref, 'c', values.length())
         data =  c.get_from_ptr(characteristic.value.bytes().arg_ref, 'c', characteristic.value.length())
         name = peripheral.name.cString()
-        rssi = 0
+        peripheral.readRSSI()
+        rssi = peripheral.RSSI and peripheral.RSSI.intValue() or 0
         if self.callback:
             if self.queue is not None:
                 self.queue.append((rssi, name, data))
