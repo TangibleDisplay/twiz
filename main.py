@@ -368,8 +368,12 @@ class BLEApp(App):
         '', 'general', 'device_filter', 'app', val_type=str)
     nexus4_fix = ConfigParserProperty(
         False, 'android', 'nexus4_fix', 'app', val_type=configbool)
+    osx_queue_fix = ConfigParserProperty(
+        False, 'osx', 'osx_queue_fix', 'app', val_type=configbool)
 
     def build(self):
+        if __name__ != '__main__':
+            self.root = Builder.load_file('ble.kv')
         self.scanner = None
         self.init_ble()
         self.set_scanning(True)
@@ -388,11 +392,14 @@ class BLEApp(App):
 
     def build_config(self, config):
         config.setdefaults('general', {
-            'auto_activate': 0,
-            'auto_display': 0
+            'auto_activate': False,
+            'auto_display': False
             })
         config.setdefaults('android', {
-            'nexus4_fix': 0,
+            'nexus4_fix': False,
+            })
+        config.setdefaults('osx', {
+            'osx_queue_fix': False,
             })
 
     def build_settings(self, settings):
@@ -470,6 +477,9 @@ class BLEApp(App):
                 self.root.ids.scan.ids.results.remove_widget(v)
                 self.remove_visu(v)
 
+    def on_osx_queue_fix(self, *args):
+        self.scanner.queue = [] if self.osx_queue_fix else None
+
     def init_ble(self):
         if platform == 'android':
             self.scanner = AndroidScanner()
@@ -479,7 +489,7 @@ class BLEApp(App):
             self.scanner = Ble()
             self.scanner.create()
             self.scanner.callback = self.osx_parse_event
-            self.scanner.queue = []
+            self.scanner.queue = [] if self.osx_queue_fix else None
 
         else:
             try:

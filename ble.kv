@@ -9,6 +9,7 @@
 #:set larger_line '46dp'
 #:import chain itertools.chain
 #:import sp kivy.metrics.sp
+#:import platform kivy.utils.platform
 
 #:set twiz_address_width .30
 #:set twiz_id_width .15
@@ -47,8 +48,25 @@ TabbedPanel:
 
     Logs:
 
+    SettingsTab:
+
     About:
 
+
+<SettingsTab@TabbedPanelItem>:
+    text: 'Settings'
+
+    GridLayout:
+        cols: 2
+
+        Label:
+            text: 'use queue to smooth events on osx (adds a delay)'
+
+        Switch:
+            active: app.osx_queue_fix
+            on_active:
+                app.osx_queue_fix = self.active
+            disabled: platform != 'macosx'
 
 <About@TabbedPanelItem>:
     text: 'About'
