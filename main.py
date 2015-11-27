@@ -373,8 +373,9 @@ class BLEApp(App):
         False, 'osx', 'osx_queue_fix', 'app', val_type=configbool)
 
     def build(self):
-        if __name__ != '__main__':
-            self.root = Builder.load_file('ble.kv')
+        # uncomment these lines to use profiling
+        # if __name__ != '__main__':
+        #     self.root = Builder.load_file('ble.kv')
         self.scanner = None
         self.init_ble()
         self.set_scanning(True)
