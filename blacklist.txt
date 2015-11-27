@@ -22,7 +22,7 @@ license_creator.py
 main.py
 requirements*.txt
 setup.py
-site-packages
+src
 test*.py
 test_objectviz.py
 tests
