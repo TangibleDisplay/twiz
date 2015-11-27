@@ -24,6 +24,7 @@ main.py
 pip
 requirements*.txt
 setup.py
+site-packages/*
 src
 test*.py
 test_objectviz.py

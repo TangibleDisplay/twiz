@@ -1,2 +1,3 @@
 __init__.py
-pyobjus
+site-packages/pyobjus/
+site-packages/pyobjus/**
