@@ -10,6 +10,7 @@
 *.swp
 .git
 .gitignore
+Cython
 GStreamer
 Makefile
 _main.py
@@ -20,6 +21,7 @@ examples
 installer
 license_creator.py
 main.py
+pip
 requirements*.txt
 setup.py
 src
