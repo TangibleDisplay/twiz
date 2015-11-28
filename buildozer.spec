@@ -58,10 +58,10 @@ fullscreen = 0
 android.permissions = INTERNET,BLUETOOTH_ADMIN,BLUETOOTH,WAKE_LOCK
 
 # (int) Android API to use
-android.api = 18
+android.api = 19
 
 # (int) Minimum API required (8 = Android 2.2 devices)
-android.minapi = 18
+android.minapi = 19
 
 # (int) Android SDK version to use
 #android.sdk = 21
