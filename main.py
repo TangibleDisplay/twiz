@@ -278,7 +278,7 @@ class TwizDevice(FloatLayout):
                         d, t = i.split('_')
                         i = d
                         if t == 'd':
-                            func = lambda x: (float(x) / 0xffff) % 1
+                            func = lambda x: (float(x) / 0xffff) + .5
                         else:
                             func = lambda x: x % 0xffff
                     else:

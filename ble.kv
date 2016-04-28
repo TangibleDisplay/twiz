@@ -251,29 +251,29 @@ TabbedPanel:
             rgba: color_x
         Line:
             points:
-                chain(*[
+                list(chain(*[
                 (root.x + x * self.width / root.data_len,
                 self.y + self.height * (y - self.min_value) / (root.max_value - root.min_value))
                 for x, y in enumerate(root.line_x)
-                ]) if root.data_len and root.max_value and root.line_x else ()
+                ])) if root.data_len and root.max_value and root.line_x else ()
         Color:
             rgba: color_y
         Line:
             points:
-                chain(*[
+                list(chain(*[
                 (root.x + x * self.width / root.data_len,
                 self.y + self.height * (y - self.min_value) / (root.max_value - root.min_value))
                 for x, y in enumerate(root.line_y)
-                ]) if root.data_len and root.max_value and root.line_y else ()
+                ])) if root.data_len and root.max_value and root.line_y else ()
         Color:
             rgba: color_z
         Line:
             points:
-                chain(*[
+                list(chain(*[
                 (root.x + x * self.width / root.data_len,
                 self.y + self.height * (y - self.min_value) / (root.max_value - root.min_value))
                 for x, y in enumerate(root.line_z)
-                ]) if root.data_len and root.max_value and root.line_z else ()
+                ])) if root.data_len and root.max_value and root.line_z else ()
 
 <ObjectView>:
     size_hint_y: None
