@@ -140,6 +140,8 @@ class Ble(object):
         if self.callback:
             if self.queue is not None:
                 self.queue.append((rssi, name, data))
+            while len(self.queue) > 5:
+                self.queue.pop(0)
 
             else:
                 self.callback(rssi, name, data)
