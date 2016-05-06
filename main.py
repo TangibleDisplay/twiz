@@ -229,6 +229,10 @@ class TwizDevice(FloatLayout):
         self.send_updates()
 
     def on_active(self, *args):
+        if not self.display and not self.active:
+            if hasattr(app.scanner, 'disconnect'):
+                app.scanner.disconnect(app.scanner.peripherals[self.name][0])
+
         if self.active:
             app.ensure_sections(self)
 
@@ -313,7 +317,7 @@ class TwizDevice(FloatLayout):
     def on_display(self, *args):
         if not self.display:
             app.remove_visu(self)
-            if hasattr(app.scanner, 'disconnect'):
+            if hasattr(app.scanner, 'disconnect') and not self.active:
                 app.scanner.disconnect(app.scanner.peripherals[self.name][0])
 
         else:

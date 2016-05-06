@@ -35,8 +35,8 @@ class Ble(object):
         self.central.cancelPeripheralConnection_(peripheral)
         self.central.connectPeripheral_options_(peripheral, None, None)
 
-    def disconnecte(self, peripheral):
-        # XXX !
+    def disconnect(self, peripheral):
+        self.central.cancelPeripheralConnection_(peripheral)
         print "Disconnect Not Implemented!"
 
     def create(self):
