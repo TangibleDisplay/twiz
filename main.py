@@ -502,6 +502,11 @@ class BLEApp(App):
     def simulate_twiz(self, dt):
         self.root.ids.scan.add_widget(TwizSimulator())
 
+    def on_auto_activate(self, *args):
+        if self.auto_activate:
+            for d in self.scan_results.values():
+                d.active = True
+
     def filter_scan_result(self, result):
         return self.device_filter.strip().lower() in result.lower()
 
