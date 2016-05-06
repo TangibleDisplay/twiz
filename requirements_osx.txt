@@ -1,1 +1,1 @@
-pyobjus
+https://github.com/kivy/pyobjus/archive/master.zip
