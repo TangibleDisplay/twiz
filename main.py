@@ -375,6 +375,8 @@ class BLEApp(App):
         False, 'android', 'nexus4_fix', 'app', val_type=configbool)
     osx_queue_fix = ConfigParserProperty(
         False, 'osx', 'osx_queue_fix', 'app', val_type=configbool)
+    display_timeout = ConfigParserProperty(
+        10, 'general', 'display_timeout', 'app', val_type=int)
 
     def build(self):
         # uncomment these lines to use profiling
@@ -476,7 +478,11 @@ class BLEApp(App):
         p.open()
 
     def clean_results(self, dt):
-        t = time() - 10  # forget devices after 10 seconds without any update
+        # forget devices after N seconds without any update
+        if not self.display_timeout:
+            return
+
+        t = time() - self.display_timeout
         for k, v in self.scan_results.items():
             if v.last_update < t:
                 self.scan_results.pop(k)

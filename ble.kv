@@ -83,6 +83,22 @@ TabbedPanel:
             disabled: platform != 'macosx'
 
         Label:
+            text: 'hide devices after N seconds of inactivity (0 for never)'
+
+        Slider:
+            id: slider_timeout
+            step: 1
+            min: 0
+            max: 120
+            value: app.display_timeout
+            on_value: app.display_timeout = self.value
+            Label:
+                size: self.texture_size
+                center_x: slider_timeout.center_x
+                y: slider_timeout.y
+                text: '{}'.format(app.display_timeout or 'never')
+
+        Label:
             text: 'use nexus 4/7 fix (android only)'
 
         Switch:
