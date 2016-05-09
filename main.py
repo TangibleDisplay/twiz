@@ -243,7 +243,10 @@ class TwizDevice(FloatLayout):
 
     def send_updates(self):
         if not self.active:
-            return
+            if app.auto_activate and app.config.items(self.name + '-osc'):
+                self.active = True
+            else:
+                return
 
         self.send_osc_updates()
         self.send_midi_updates()
@@ -517,11 +520,6 @@ class BLEApp(App):
     def simulate_twiz(self, dt):
         self.root.ids.scan.add_widget(TwizSimulator())
 
-    def on_auto_activate(self, *args):
-        if self.auto_activate:
-            for d in self.scan_results.values():
-                d.active = True
-
     def filter_scan_result(self, result):
         return self.device_filter.strip().lower() in result.lower()
 
@@ -589,7 +587,7 @@ class BLEApp(App):
         name = data.get('name', '')
         pd = self.scan_results.get(name)
         if not pd:
-            pd = TwizDevice(active=app.auto_activate)
+            pd = TwizDevice()
         pd.update_data(data)
         results = self.root.ids.scan.ids.results
         if app.auto_display:
