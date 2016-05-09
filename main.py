@@ -235,6 +235,11 @@ class TwizDevice(FloatLayout):
 
         if self.active:
             app.ensure_sections(self)
+            if hasattr(app.scanner, 'connect'):
+                app.scanner.connect(app.scanner.peripherals[self.name][0])
+        else:
+            if hasattr(app.scanner, 'disconnect'):
+                app.scanner.disconnect(app.scanner.peripherals[self.name][0])
 
     def send_updates(self):
         if not self.active:
