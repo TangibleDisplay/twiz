@@ -236,7 +236,7 @@ class TwizDevice(FloatLayout):
         if self.active:
             app.ensure_sections(self)
             if hasattr(app.scanner, 'connect'):
-                app.scanner.connect(app.scanner.peripherals[self.name][0])
+                app.scanner.connect(app.scanner.peripherals[self.name][0], stop_scan=False)
         else:
             if hasattr(app.scanner, 'disconnect'):
                 app.scanner.disconnect(app.scanner.peripherals[self.name][0])
@@ -331,7 +331,7 @@ class TwizDevice(FloatLayout):
         else:
             app.add_visu(self)
             if hasattr(app.scanner, 'connect'):
-                app.scanner.connect(app.scanner.peripherals[self.name][0])
+                app.scanner.connect(app.scanner.peripherals[self.name][0], stop_scan=False)
 
 
 class TwizSimulator(TwizDevice):

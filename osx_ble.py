@@ -29,9 +29,10 @@ class Ble(object):
         elif state == CBCentralManagerStateUnsupported:
             print 'CentralManager: This hardware doesnt support BLE'
 
-    def connect(self, peripheral):
+    def connect(self, peripheral, stop_scan=True):
         print "connecting"
-        self.stop_scan()
+        if stop_scan:
+            self.stop_scan()
         self.central.cancelPeripheralConnection_(peripheral)
         self.central.connectPeripheral_options_(peripheral, None, None)
 
