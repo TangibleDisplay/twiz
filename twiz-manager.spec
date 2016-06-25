@@ -7,6 +7,7 @@ if IS_LINUX:
     from PyInstaller.depend import dylib
     dylib._unix_excludes.update({
         r'.*nvidia.*': 1,
+        r'.*libdrm.*': 1,
         })
 
     dylib.exclude_list = dylib.ExcludeList()
